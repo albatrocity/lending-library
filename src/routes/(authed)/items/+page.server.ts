@@ -1,8 +1,11 @@
 import { getAllItems } from '$lib/server/services/itemsService';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ parent }) => {
+	const { user } = await parent();
+
 	return {
-		items: await getAllItems()
+		items: await getAllItems(),
+		user: user
 	};
 };

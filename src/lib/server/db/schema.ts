@@ -66,7 +66,6 @@ export const items = pgTable(
 		id: serial('id').primaryKey(),
 		name: text('name').notNull(),
 		description: text('description').notNull(),
-		tags: text('tags').array(),
 		ownerId: text('owner_id')
 			.notNull()
 			.references(() => user.id),

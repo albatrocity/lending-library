@@ -1,14 +1,12 @@
 <script lang="ts">
 	import type { PageServerData } from './$types';
+	import ItemListItem from '$lib/components/ItemListItem.svelte';
 
 	let { data }: { data: PageServerData } = $props();
 </script>
 
 <div>
 	{#each data.items as item}
-		<div>
-			<h2>{item.name}</h2>
-			<p>{item.description}</p>
-		</div>
+		<ItemListItem {...item} currentUserId={data.user.id} />
 	{/each}
 </div>

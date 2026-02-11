@@ -9,8 +9,14 @@ export const relations = defineRelations(
 		user: {
 			sessions: r.many.session(),
 			accounts: r.many.account(),
-			borrowRequests: r.many.borrowRequests(),
-			borrows: r.many.borrows(),
+			borrowRequests: r.many.borrowRequests({
+				from: r.user.id.through(r.borrowRequests.userId),
+				to: r.borrowRequests.id.through(r.borrowRequests.userId)
+			}),
+			borrows: r.many.borrows({
+				from: r.user.id.through(r.borrows.borrowerId),
+				to: r.borrows.id.through(r.borrows.borrowerId)
+			}),
 			items: r.many.items({
 				from: r.user.id.through(r.items.ownerId),
 				to: r.items.id.through(r.items.ownerId)
