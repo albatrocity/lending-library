@@ -1,11 +1,45 @@
 import { defineRelations } from 'drizzle-orm';
-import { images, tags, tagsToItems, items, borrowRequests, borrows, user } from './schema';
+import {
+	images,
+	tags,
+	tagsToItems,
+	items,
+	borrowRequests,
+	borrows,
+	user,
+	communities,
+	communityMemberships,
+	communityItems
+} from './schema';
 
 import { session, account } from './auth.schema';
 
 export const relations = defineRelations(
-	{ tags, items, tagsToItems, borrowRequests, borrows, user, images, session, account },
+	{
+		tags,
+		items,
+		tagsToItems,
+		borrowRequests,
+		borrows,
+		user,
+		images,
+		session,
+		account,
+		communities,
+		communityMemberships,
+		communityItems
+	},
 	(r) => ({
+		communities: {
+			members: r.many.user({
+				from: r.communities.id.through(r.communityMemberships.communityId),
+				to: r.user.id.through(r.communityMemberships.userId)
+			}),
+			items: r.many.items({
+				from: r.communities.id.through(r.communityItems.communityId),
+				to: r.items.id.through(r.communityItems.itemId)
+			})
+		},
 		user: {
 			sessions: r.many.session(),
 			accounts: r.many.account(),

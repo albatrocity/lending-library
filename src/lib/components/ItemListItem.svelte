@@ -12,7 +12,7 @@
 </script>
 
 <div>
-	<span>{name} - {id}</span>
+	<span><a href="/items/{id}">{name} - {id}</a></span>
 	{@html description}
 	<ul>
 		{#each tags as tag}
@@ -25,5 +25,9 @@
 			<input type="hidden" name="id" value={id} />
 			<button type="submit">Delete</button>
 		</form>
+	{/if}
+
+	{#if currentUserId !== ownerId}
+		<a href="/items/{id}/borrow">Borrow</a>
 	{/if}
 </div>

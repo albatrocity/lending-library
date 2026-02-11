@@ -1,6 +1,6 @@
 import { getItem, updateItem } from '$lib/server/services/itemsService';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import type { PageServerLoad } from '../../[id]/edit/$types';
 import { updateItemSchema } from '$lib/schemas/items';
 
 export const load: PageServerLoad = async ({ params, parent }) => {

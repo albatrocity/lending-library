@@ -1,5 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import type { Actions } from '../../[id]/delete/$types';
 import { deleteItem, getItem } from '$lib/server/services/itemsService';
 
 export const actions: Actions = {
