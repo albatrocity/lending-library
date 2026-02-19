@@ -1,6 +1,10 @@
 import { db } from '$lib/server/db';
-import { items } from '$lib/server/db/schema';
-import { createItemSchema, updateItemSchema } from '$lib/schemas/items';
+import { communityItems, items } from '$lib/server/db/schema';
+import {
+	createItemSchema,
+	createItemWithCommunitiesSchema,
+	updateItemSchema
+} from '$lib/schemas/items';
 import type { z } from 'zod';
 import { eq } from 'drizzle-orm';
 
@@ -16,6 +20,33 @@ export const createItem = async (payload: z.infer<typeof createItemSchema>) => {
 	const params = createItemSchema.parse(payload);
 
 	return await db.insert(items).values(params);
+};
+
+export const createItemInCommunities = async (
+	payload: z.infer<typeof createItemWithCommunitiesSchema>
+) => {
+	const params = createItemWithCommunitiesSchema.parse(payload);
+
+	const { communityIds, ...itemParams } = params;
+
+	return await db.transaction(async (tx) => {
+		const item = (await tx.insert(items).values(itemParams).returning()).at(0);
+
+		if (!item) {
+			throw new Error('Failed to create item');
+		}
+
+		if (communityIds.length > 0) {
+			await tx.insert(communityItems).values(
+				communityIds.map((communityId) => ({
+					communityId,
+					itemId: item.id
+				}))
+			);
+		}
+
+		return item;
+	});
 };
 
 export const deleteItem = async (id: number) => {

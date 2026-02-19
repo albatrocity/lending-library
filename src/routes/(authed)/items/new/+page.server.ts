@@ -1,7 +1,16 @@
-import { createItem } from '$lib/server/services/itemsService';
+import { createItemInCommunities } from '$lib/server/services/itemsService';
 import { fail, redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
-import { createItemSchema } from '$lib/schemas/items';
+import type { Actions, PageServerLoad } from './$types';
+import { createItemWithCommunitiesSchema } from '$lib/schemas/items';
+import { getUserCommunities } from '$lib/server/services/communitiesService';
+
+export const load: PageServerLoad = async ({ parent }) => {
+	const { user } = await parent();
+
+	const communities = await getUserCommunities(user.id);
+
+	return { communities };
+};
 
 export const actions: Actions = {
 	createItem: async (event) => {
@@ -11,7 +20,7 @@ export const actions: Actions = {
 
 		const formData = Object.fromEntries(await event.request.formData());
 
-		const { data, success, error } = createItemSchema.safeParse({
+		const { data, success, error } = createItemWithCommunitiesSchema.safeParse({
 			...formData,
 			ownerId: event.locals.user.id
 		});
@@ -20,7 +29,7 @@ export const actions: Actions = {
 			return fail(400, { errors: error?.message ?? 'Invalid data' });
 		}
 
-		await createItem(data);
+		await createItemInCommunities(data);
 
 		redirect(302, '/items');
 	}
