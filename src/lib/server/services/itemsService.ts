@@ -16,6 +16,18 @@ export const getAllItems = async () => {
 	});
 };
 
+export const getAllItemsByOwnerId = async (ownerId: string) => {
+	return await db.query.items.findMany({
+		with: {
+			tags: true
+		},
+		where: {
+			ownerId
+		}
+	});
+};
+
+
 export const createItem = async (payload: z.infer<typeof createItemSchema>) => {
 	const params = createItemSchema.parse(payload);
 

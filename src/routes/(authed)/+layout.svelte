@@ -7,6 +7,7 @@
 <div>
 	<h1>Hi, {data.user.name}!</h1>
 	<p>Your user ID is {data.user.id}.</p>
+	<p>Your email is {data.user.email}.</p>
 
 	<form method="post" action="/logout" use:enhance>
 		<button type="submit">Sign out</button>
