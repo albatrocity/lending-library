@@ -1,6 +1,7 @@
 import {
 	getCommunityById,
-	isUserCommunityMember
+	isUserCommunityMember,
+	getCommunityItems
 } from '$lib/server/services/communitiesService';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -27,11 +28,12 @@ export const load: PageServerLoad = async ({ parent, params }) => {
 	}
 
 	const isOwner = community.ownerId === user.id;
+	const items = await getCommunityItems(communityId);
 
 	return {
 		community,
 		isOwner,
+		items,
 		user
 	};
 };
-

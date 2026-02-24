@@ -9,6 +9,12 @@
 	<p>Your user ID is {data.user.id}.</p>
 	<p>Your email is {data.user.email}.</p>
 
+	<nav>
+		<ul>
+			<li><a href="/items">Items</a></li>
+			<li><a href="/communities">Communities</a></li>
+		</ul>
+	</nav>
 	<form method="post" action="/logout" use:enhance>
 		<button type="submit">Sign out</button>
 	</form>

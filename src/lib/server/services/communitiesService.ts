@@ -1,8 +1,8 @@
 import { db } from '$lib/server/db';
-import { communities, communityMemberships, user } from '$lib/server/db/schema';
+import { communities, communityMemberships, communityItems, items, user } from '$lib/server/db/schema';
 import type { CreateCommunity } from '$lib/schemas/communities';
 
-import { eq, inArray, and } from 'drizzle-orm';
+import { eq, inArray, and, notInArray } from 'drizzle-orm';
 
 export const getCommunitiesCreatedByUserId = async (userId: string) => {
 	return await db.query.communities.findMany({
@@ -107,4 +107,51 @@ export const isUserCommunityMember = async (userId: string, communityId: number)
 		.limit(1);
 
 	return membership.length > 0;
+};
+
+export const addItemToCommunity = async (communityId: number, itemId: number) => {
+	// Check if already in community
+	const existing = await db
+		.select()
+		.from(communityItems)
+		.where(and(eq(communityItems.communityId, communityId), eq(communityItems.itemId, itemId)))
+		.limit(1);
+
+	if (existing.length > 0) {
+		return { alreadyInCommunity: true };
+	}
+
+	await db.insert(communityItems).values({
+		communityId,
+		itemId
+	});
+
+	return { alreadyInCommunity: false };
+};
+
+export const getCommunityItems = async (communityId: number) => {
+	return await db
+		.select({
+			id: items.id,
+			name: items.name,
+			description: items.description,
+			ownerId: items.ownerId,
+			ownerName: user.name
+		})
+		.from(communityItems)
+		.innerJoin(items, eq(communityItems.itemId, items.id))
+		.innerJoin(user, eq(items.ownerId, user.id))
+		.where(eq(communityItems.communityId, communityId));
+};
+
+export const getOwnerItemsNotInCommunity = async (ownerId: string, communityId: number) => {
+	const itemsInCommunity = db
+		.select({ id: communityItems.itemId })
+		.from(communityItems)
+		.where(eq(communityItems.communityId, communityId));
+
+	return await db
+		.select()
+		.from(items)
+		.where(and(eq(items.ownerId, ownerId), notInArray(items.id, itemsInCommunity)));
 };
