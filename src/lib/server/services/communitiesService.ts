@@ -155,3 +155,23 @@ export const getOwnerItemsNotInCommunity = async (ownerId: string, communityId: 
 		.from(items)
 		.where(and(eq(items.ownerId, ownerId), notInArray(items.id, itemsInCommunity)));
 };
+
+export const getCommunitiesForItemAssignment = async (userId: string, itemId: number) => {
+	// Get communities the item is already in
+	const itemCommunityIds = db
+		.select({ id: communityItems.communityId })
+		.from(communityItems)
+		.where(eq(communityItems.itemId, itemId));
+
+	// Return communities user owns that don't have this item
+	return await db
+		.select()
+		.from(communities)
+		.where(and(eq(communities.ownerId, userId), notInArray(communities.id, itemCommunityIds)));
+};
+
+export const removeItemFromCommunity = async (communityId: number, itemId: number) => {
+	await db
+		.delete(communityItems)
+		.where(and(eq(communityItems.communityId, communityId), eq(communityItems.itemId, itemId)));
+};

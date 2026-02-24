@@ -1,5 +1,7 @@
 <script lang="ts">
-	let { data } = $props();
+	import { enhance } from '$app/forms';
+
+	let { data, form } = $props();
 </script>
 
 <div>
@@ -33,9 +35,23 @@
 					{/if}
 					<br />
 					<small>Owned by {item.ownerName}</small>
+					{#if data.isOwner}
+						<form method="post" action="?/removeItem" use:enhance style="display: inline;">
+							<input type="hidden" name="itemId" value={item.id} />
+							<button type="submit">Remove</button>
+						</form>
+					{/if}
 				</li>
 			{/each}
 		</ul>
+	{/if}
+
+	{#if form?.removed}
+		<p>Item removed from community.</p>
+	{/if}
+
+	{#if form?.error}
+		<p>{form.error}</p>
 	{/if}
 
 	<h2>Members ({data.community.members.length})</h2>
