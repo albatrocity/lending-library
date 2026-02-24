@@ -1,11 +1,11 @@
-import { getAllItems } from '$lib/server/services/itemsService';
+import { getAllItemsByOwnerId } from '$lib/server/services/itemsService';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { user } = await parent();
 
 	return {
-		items: await getAllItems(),
+		items: await getAllItemsByOwnerId(user.id),
 		user: user
 	};
 };
