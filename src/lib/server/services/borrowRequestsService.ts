@@ -1,6 +1,10 @@
 import { db } from '$lib/server/db';
 import { borrowRequests, borrowRequestStatus } from '$lib/server/db/schema';
-import { createBorrowRequestSchema, updateBorrowRequestSchema } from '$lib/schemas/borrowRequests';
+import {
+	createBorrowRequestSchema,
+	updateBorrowRequestSchema,
+	type BorrowRequestStatus
+} from '$lib/schemas/borrowRequests';
 
 import type { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
@@ -25,9 +29,12 @@ export const getBorrowRequestsCountByItemId = async (
 };
 
 export const createBorrowRequest = async (payload: z.infer<typeof createBorrowRequestSchema>) => {
-	const params = createBorrowRequestSchema.parse(payload);
+	const params = createBorrowRequestSchema.parse({
+		...payload,
+		status: 'pending'
+	});
 
-	return await db.insert(borrowRequests).values(params);
+	return (await db.insert(borrowRequests).values(params).returning()).at(0);
 };
 
 export const deleteBorrowRequest = async (id: number) => {
@@ -53,4 +60,18 @@ export const updateBorrowRequest = async (
 	).at(0);
 
 	return updated;
+};
+
+export const getUserItemBorrowRequest = async (payload: {
+	userId: string;
+	itemId: number;
+	status: BorrowRequestStatus;
+}) => {
+	return await db.query.borrowRequests.findFirst({
+		where: {
+			userId: payload.userId,
+			itemId: payload.itemId,
+			status: payload.status
+		}
+	});
 };

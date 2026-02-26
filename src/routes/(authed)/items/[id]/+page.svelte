@@ -14,8 +14,6 @@
 	{/each}
 </ul>
 
-<a href="/items/{item.id}/borrow">Borrow</a>
-
 <h2>Communities</h2>
 {#if data.isOwner}
 	{#if data.itemCommunities.length === 0}
@@ -34,7 +32,10 @@
 		</ul>
 	{/if}
 {:else}
-	<p>This item is available in {data.itemCommunities.length} {data.itemCommunities.length === 1 ? 'community' : 'communities'}</p>
+	<p>
+		This item is available in {data.itemCommunities.length}
+		{data.itemCommunities.length === 1 ? 'community' : 'communities'}
+	</p>
 {/if}
 
 {#if data.isOwner}
@@ -59,5 +60,16 @@
 
 	{#if form?.success}
 		<p>Item added to community successfully!</p>
+	{/if}
+{/if}
+
+{#if !data.isOwner}
+	{#if data.pendingBorrowRequest}
+		<p>
+			You requested to borrow this item on {data.pendingBorrowRequest.createdAt.toLocaleDateString()}
+			starting on {data.pendingBorrowRequest.startDate.toLocaleDateString()} and ending on {data.pendingBorrowRequest.endDate?.toLocaleDateString()}
+		</p>
+	{:else}
+		<a href="/items/{item.id}/borrow">Borrow this item</a>
 	{/if}
 {/if}

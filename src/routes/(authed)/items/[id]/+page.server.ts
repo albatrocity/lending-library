@@ -1,4 +1,8 @@
-import { getItem, getItemCommunities } from '$lib/server/services/itemsService';
+import {
+	getItem,
+	getItemCommunities,
+	getUserAccessToItem
+} from '$lib/server/services/itemsService';
 import {
 	getCommunitiesForItemAssignment,
 	addItemToCommunity,
@@ -6,6 +10,7 @@ import {
 } from '$lib/server/services/communitiesService';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { getUserItemBorrowRequest } from '$lib/server/services/borrowRequestsService';
 
 export const load: PageServerLoad = async ({ params, parent }) => {
 	const { user } = await parent();
@@ -16,20 +21,30 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 		return error(404, 'Item not found');
 	}
 
+	if (!(await getUserAccessToItem(user.id, itemId))) {
+		return error(403, 'You do not have access to this item');
+	}
+
 	const isOwner = item.ownerId === user.id;
 	const itemCommunities = await getItemCommunities(itemId);
 
-	// Only load available communities if user is the owner
 	const availableCommunities = isOwner
 		? await getCommunitiesForItemAssignment(user.id, itemId)
 		: [];
+
+	const pendingBorrowRequest = await getUserItemBorrowRequest({
+		userId: user.id,
+		itemId: itemId,
+		status: 'pending'
+	});
 
 	return {
 		item,
 		user,
 		isOwner,
 		itemCommunities,
-		availableCommunities
+		availableCommunities,
+		pendingBorrowRequest
 	};
 };
 
@@ -87,7 +102,7 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const communityId = Number(formData.get('communityId'));
 
-		if (isNaN(communityId)) {
+		if (Number.isNaN(communityId)) {
 			return fail(400, { error: 'Invalid community' });
 		}
 
