@@ -17,22 +17,24 @@
 <a href="/items/{item.id}/borrow">Borrow</a>
 
 <h2>Communities</h2>
-{#if data.itemCommunities.length === 0}
-	<p>This item is not in any communities yet.</p>
-{:else}
-	<ul>
-		{#each data.itemCommunities as community}
-			<li>
-				{community.name}
-				{#if data.isOwner}
+{#if data.isOwner}
+	{#if data.itemCommunities.length === 0}
+		<p>This item is not in any communities yet.</p>
+	{:else}
+		<ul>
+			{#each data.itemCommunities as community}
+				<li>
+					{community.name}
 					<form method="post" action="?/removeFromCommunity" use:enhance style="display: inline;">
 						<input type="hidden" name="communityId" value={community.id} />
 						<button type="submit">Remove</button>
 					</form>
-				{/if}
-			</li>
-		{/each}
-	</ul>
+				</li>
+			{/each}
+		</ul>
+	{/if}
+{:else}
+	<p>This item is available in {data.itemCommunities.length} {data.itemCommunities.length === 1 ? 'community' : 'communities'}</p>
 {/if}
 
 {#if data.isOwner}

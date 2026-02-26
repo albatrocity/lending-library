@@ -1,5 +1,11 @@
 import { db } from '$lib/server/db';
-import { communities, communityMemberships, communityItems, items, user } from '$lib/server/db/schema';
+import {
+	communities,
+	communityMemberships,
+	communityItems,
+	items,
+	user
+} from '$lib/server/db/schema';
 import type { CreateCommunity } from '$lib/schemas/communities';
 
 import { eq, inArray, and, notInArray } from 'drizzle-orm';
@@ -163,11 +169,18 @@ export const getCommunitiesForItemAssignment = async (userId: string, itemId: nu
 		.from(communityItems)
 		.where(eq(communityItems.itemId, itemId));
 
-	// Return communities user owns that don't have this item
+	const userCommunityIds = db
+		.select({ id: communityMemberships.communityId })
+		.from(communityMemberships)
+		.where(eq(communityMemberships.userId, userId));
+
+	// Return communities user belongs to that don't have this item
 	return await db
 		.select()
 		.from(communities)
-		.where(and(eq(communities.ownerId, userId), notInArray(communities.id, itemCommunityIds)));
+		.where(
+			and(inArray(communities.id, userCommunityIds), notInArray(communities.id, itemCommunityIds))
+		);
 };
 
 export const removeItemFromCommunity = async (communityId: number, itemId: number) => {
