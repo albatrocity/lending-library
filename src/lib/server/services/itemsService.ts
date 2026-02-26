@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { communityItems, items } from '$lib/server/db/schema';
+import { communityItems, communities, items } from '$lib/server/db/schema';
 import {
 	createItemSchema,
 	createItemWithCommunitiesSchema,
@@ -82,4 +82,15 @@ export const updateItem = async (id: number, payload: z.infer<typeof updateItemS
 	const updated = (await db.update(items).set(params).where(eq(items.id, id)).returning()).at(0);
 
 	return updated;
+};
+
+export const getItemCommunities = async (itemId: number) => {
+	return await db
+		.select({
+			id: communities.id,
+			name: communities.name
+		})
+		.from(communityItems)
+		.innerJoin(communities, eq(communityItems.communityId, communities.id))
+		.where(eq(communityItems.itemId, itemId));
 };

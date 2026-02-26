@@ -7,6 +7,7 @@
 	<nav>
 		<ul>
 			<li><a href="/items">My Items</a></li>
+			<li><a href="/communities">Communities</a></li>
 			<li><a href="/logout">Logout</a></li>
 		</ul>
 	</nav>
