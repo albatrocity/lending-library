@@ -67,7 +67,7 @@
 	{#if data.pendingBorrowRequest}
 		<p>
 			You requested to borrow this item on {data.pendingBorrowRequest.createdAt.toLocaleDateString()}
-			starting on {data.pendingBorrowRequest.startDate.toLocaleDateString()} and ending on {data.pendingBorrowRequest.endDate?.toLocaleDateString()}
+			starting {data.pendingBorrowRequest.startDate.toLocaleDateString()}
 		</p>
 	{:else}
 		<a href="/items/{item.id}/borrow">Borrow this item</a>

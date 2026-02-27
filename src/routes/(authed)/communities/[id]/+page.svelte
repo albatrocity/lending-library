@@ -28,20 +28,22 @@
 	{:else}
 		<ul>
 			{#each data.items as item}
-				<li>
-					<strong>{item.name}</strong>
-					{#if item.description}
-						- {item.description}
-					{/if}
-					<br />
-					<small>Owned by {item.ownerName}</small>
-					{#if data.isOwner}
-						<form method="post" action="?/removeItem" use:enhance style="display: inline;">
-							<input type="hidden" name="itemId" value={item.id} />
-							<button type="submit">Remove</button>
-						</form>
-					{/if}
-				</li>
+				<a href="/items/{item.id}">
+					<li>
+						<strong>{item.name}</strong>
+						{#if item.description}
+							- {item.description}
+						{/if}
+						<br />
+						<small>Owned by {item.ownerName}</small>
+						{#if data.isOwner}
+							<form method="post" action="?/removeItem" use:enhance style="display: inline;">
+								<input type="hidden" name="itemId" value={item.id} />
+								<button type="submit">Remove</button>
+							</form>
+						{/if}
+					</li>
+				</a>
 			{/each}
 		</ul>
 	{/if}
