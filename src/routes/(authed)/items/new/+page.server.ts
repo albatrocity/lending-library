@@ -18,10 +18,13 @@ export const actions: Actions = {
 			return fail(401, { errors: 'Unauthorized' });
 		}
 
-		const formData = Object.fromEntries(await event.request.formData());
+		const rawFormData = await event.request.formData();
+		const formData = Object.fromEntries(rawFormData);
+		const communityIds = rawFormData.getAll('communityIds').map(Number);
 
 		const { data, success, error } = createItemWithCommunitiesSchema.safeParse({
 			...formData,
+			communityIds,
 			ownerId: event.locals.user.id
 		});
 
