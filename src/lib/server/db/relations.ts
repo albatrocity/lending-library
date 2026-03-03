@@ -44,16 +44,16 @@ export const relations = defineRelations(
 			sessions: r.many.session(),
 			accounts: r.many.account(),
 			borrowRequests: r.many.borrowRequests({
-				from: r.user.id.through(r.borrowRequests.userId),
-				to: r.borrowRequests.id.through(r.borrowRequests.userId)
+				from: r.user.id,
+				to: r.borrowRequests.userId
 			}),
 			borrows: r.many.borrows({
-				from: r.user.id.through(r.borrows.borrowerId),
-				to: r.borrows.id.through(r.borrows.borrowerId)
+				from: r.user.id,
+				to: r.borrows.borrowerId
 			}),
 			items: r.many.items({
-				from: r.user.id.through(r.items.ownerId),
-				to: r.items.id.through(r.items.ownerId)
+				from: r.user.id,
+				to: r.items.ownerId
 			})
 		},
 		session: {
@@ -92,12 +92,22 @@ export const relations = defineRelations(
 				to: r.user.id.through(r.borrows.borrowerId)
 			}),
 			borrows: r.many.borrows({
-				from: r.items.id.through(r.borrows.itemId),
-				to: r.borrows.id.through(r.borrows.itemId)
+				from: r.items.id,
+				to: r.borrows.itemId
 			}),
 			borrowRequests: r.many.borrowRequests({
-				from: r.items.id.through(r.borrowRequests.itemId),
-				to: r.borrowRequests.id.through(r.borrowRequests.itemId)
+				from: r.items.id,
+				to: r.borrowRequests.itemId
+			})
+		},
+		borrowRequests: {
+			user: r.one.user({
+				from: r.borrowRequests.userId,
+				to: r.user.id
+			}),
+			item: r.one.items({
+				from: r.borrowRequests.itemId,
+				to: r.items.id
 			})
 		}
 	})

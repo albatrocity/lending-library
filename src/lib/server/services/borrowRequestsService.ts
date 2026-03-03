@@ -1,6 +1,10 @@
 import { db } from '$lib/server/db';
-import { borrowRequests, borrowRequestStatus } from '$lib/server/db/schema';
-import { createBorrowRequestSchema, updateBorrowRequestSchema } from '$lib/schemas/borrowRequests';
+import { borrowRequests, borrowRequestStatus, borrows } from '$lib/server/db/schema';
+import {
+	createBorrowRequestSchema,
+	updateBorrowRequestSchema,
+	type BorrowRequestStatus
+} from '$lib/schemas/borrowRequests';
 
 import type { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
@@ -25,9 +29,12 @@ export const getBorrowRequestsCountByItemId = async (
 };
 
 export const createBorrowRequest = async (payload: z.infer<typeof createBorrowRequestSchema>) => {
-	const params = createBorrowRequestSchema.parse(payload);
+	const params = createBorrowRequestSchema.parse({
+		...payload,
+		status: 'pending'
+	});
 
-	return await db.insert(borrowRequests).values(params);
+	return (await db.insert(borrowRequests).values(params).returning()).at(0);
 };
 
 export const deleteBorrowRequest = async (id: number) => {
@@ -42,6 +49,15 @@ export const getBorrowRequest = async (id: number) => {
 	});
 };
 
+export const getBorrowRequestWithRelations = async (id: number) => {
+	return await db.query.borrowRequests.findFirst({
+		where: {
+			id: id
+		},
+		with: { user: true, item: true }
+	});
+};
+
 export const updateBorrowRequest = async (
 	id: number,
 	payload: z.infer<typeof updateBorrowRequestSchema>
@@ -53,4 +69,75 @@ export const updateBorrowRequest = async (
 	).at(0);
 
 	return updated;
+};
+
+export const getUserItemBorrowRequest = async (payload: {
+	userId: string;
+	itemId: number;
+	status: BorrowRequestStatus;
+}) => {
+	return await db.query.borrowRequests.findFirst({
+		where: {
+			userId: payload.userId,
+			itemId: payload.itemId,
+			status: payload.status
+		}
+	});
+};
+
+export const getBorrowRequestsForUser = async (
+	userId: string,
+	status: BorrowRequestStatus = 'pending'
+) => {
+	const items = await db.query.items.findMany({
+		where: { ownerId: userId },
+		with: { borrowRequests: { with: { user: true }, where: { status } } }
+	});
+
+	return items.filter((item) => item.borrowRequests.length > 0);
+};
+
+export const getBorrowRequestsFromUser = async (
+	userId: string,
+	status: BorrowRequestStatus = 'pending'
+) => {
+	return await db.query.borrowRequests.findMany({
+		where: { userId, status },
+		with: { user: true, item: true }
+	});
+};
+
+export const acceptBorrowRequest = async (id: number) => {
+	await db.transaction(async (tx) => {
+		const borrowRequest = (
+			await tx
+				.update(borrowRequests)
+				.set({ status: 'accepted' })
+				.where(eq(borrowRequests.id, id))
+				.returning()
+		).at(0);
+
+		const item = await tx.query.items.findFirst({
+			where: {
+				id: borrowRequest!.itemId
+			}
+		});
+
+		await tx.insert(borrows).values({
+			borrowRequestId: id,
+			borrowerId: borrowRequest!.userId,
+			lenderId: item!.ownerId,
+			itemId: borrowRequest!.itemId,
+			startDate: borrowRequest!.startDate,
+			...(borrowRequest!.endDate && { endDate: borrowRequest!.endDate }),
+			status: 'pending'
+		});
+	});
+};
+
+export const rejectBorrowRequest = async (id: number) => {
+	return await db
+		.update(borrowRequests)
+		.set({ status: 'rejected' })
+		.where(eq(borrowRequests.id, id));
 };

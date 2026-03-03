@@ -1,7 +1,6 @@
 <script lang="ts">
 	let { children, data } = $props();
 	import { enhance } from '$app/forms';
-
 </script>
 
 <div>
@@ -13,6 +12,7 @@
 		<ul>
 			<li><a href="/items">Items</a></li>
 			<li><a href="/communities">Communities</a></li>
+			<li><a href="/requests">Requests</a></li>
 		</ul>
 	</nav>
 	<form method="post" action="/logout" use:enhance>

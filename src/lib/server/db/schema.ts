@@ -19,7 +19,7 @@ export const borrowRequestStatus = pgEnum('borrowRequestStatus', [
 	'rejected'
 ]);
 
-export const borrowStatus = pgEnum('borrowStatus', ['active', 'returned', 'cancelled']);
+export const borrowStatus = pgEnum('borrowStatus', ['pending', 'active', 'returned', 'cancelled']);
 
 export const imageableType = pgEnum('imageableType', [
 	'items',
@@ -122,16 +122,12 @@ export const borrowRequests = pgTable(
 		endDate: timestamp('end_date'),
 		description: text('description'),
 		status: borrowRequestStatus().default('pending'),
-		communityId: integer('community_id')
-			.notNull()
-			.references(() => communities.id),
 		createdAt: timestamp('created_at').notNull().defaultNow(),
 		updatedAt: timestamp('updated_at').notNull().defaultNow()
 	},
 	(t) => [
 		index('borrow_requests_item_id_idx').on(t.itemId),
-		index('borrow_requests_user_id_idx').on(t.userId),
-		index('borrow_requests_community_id_idx').on(t.communityId)
+		index('borrow_requests_user_id_idx').on(t.userId)
 	]
 );
 
@@ -152,16 +148,14 @@ export const borrows = pgTable(
 		startDate: timestamp('start_date').notNull(),
 		endDate: timestamp('end_date'),
 		returnDate: timestamp('return_date'),
-		status: borrowStatus().notNull().default('active'),
-		communityId: integer('community_id').references(() => communities.id),
+		status: borrowStatus().notNull().default('pending'),
 		createdAt: timestamp('created_at').notNull().defaultNow(),
 		updatedAt: timestamp('updated_at').notNull().defaultNow()
 	},
 	(t) => [
 		index('borrows_item_id_idx').on(t.itemId),
 		index('borrows_borrower_id_idx').on(t.borrowerId),
-		index('borrows_lender_id_idx').on(t.lenderId),
-		index('borrows_community_id_idx').on(t.communityId)
+		index('borrows_lender_id_idx').on(t.lenderId)
 	]
 );
 

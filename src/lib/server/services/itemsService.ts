@@ -1,12 +1,13 @@
 import { db } from '$lib/server/db';
-import { communityItems, communities, items } from '$lib/server/db/schema';
+import { communityItems, communities, communityMemberships, items } from '$lib/server/db/schema';
 import {
 	createItemSchema,
 	createItemWithCommunitiesSchema,
 	updateItemSchema
 } from '$lib/schemas/items';
+
 import type { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 export const getAllItems = async () => {
 	return await db.query.items.findMany({
@@ -26,7 +27,6 @@ export const getAllItemsByOwnerId = async (ownerId: string) => {
 		}
 	});
 };
-
 
 export const createItem = async (payload: z.infer<typeof createItemSchema>) => {
 	const params = createItemSchema.parse(payload);
@@ -93,4 +93,28 @@ export const getItemCommunities = async (itemId: number) => {
 		.from(communityItems)
 		.innerJoin(communities, eq(communityItems.communityId, communities.id))
 		.where(eq(communityItems.itemId, itemId));
+};
+
+export const getUserAccessToItem = async (userId: string, itemId: number) => {
+	const item = await getItem(itemId);
+
+	if (!item) {
+		return false;
+	}
+
+	const isOwner = item.ownerId === userId;
+
+	const userCommunityIds = db
+		.select({ id: communityMemberships.communityId })
+		.from(communityMemberships)
+		.where(eq(communityMemberships.userId, userId));
+
+	const records = await db
+		.select()
+		.from(communityItems)
+		.where(
+			and(eq(communityItems.itemId, itemId), inArray(communityItems.communityId, userCommunityIds))
+		);
+
+	return records.length > 0 || isOwner;
 };
