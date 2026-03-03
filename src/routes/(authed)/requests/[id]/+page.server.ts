@@ -1,5 +1,6 @@
 import {
 	acceptBorrowRequest,
+	cancelBorrowRequest,
 	getBorrowRequestWithRelations,
 	rejectBorrowRequest
 } from '$lib/server/services/borrowRequestsService';
@@ -32,6 +33,12 @@ export const actions: Actions = {
 		const { params } = event;
 		const { id } = params;
 		await rejectBorrowRequest(Number(id));
+		return { success: true };
+	},
+	cancel: async (event) => {
+		const { params } = event;
+		const { id } = params;
+		await cancelBorrowRequest(Number(id));
 		return { success: true };
 	}
 };

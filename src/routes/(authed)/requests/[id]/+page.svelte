@@ -9,9 +9,21 @@
 	<h1>Your request</h1>
 	{#if request.status === 'pending'}
 		<p>Your request is still pending.</p>
+		<form
+			method="post"
+			action="?/cancel"
+			use:enhance={({ cancel }) => {
+				if (!confirm('Are you sure you want to cancel this request?')) {
+					cancel();
+				}
+			}}
+		>
+			<button type="submit">Cancel request</button>
+		</form>
 	{:else}
 		<p>
-			Request {request.status === 'accepted' ? 'accepted' : 'rejected'} at {request.updatedAt.toLocaleString()}.
+			Request {request.status === 'accepted' ? 'accepted' : request.status === 'rejected' ? 'rejected' : 'cancelled'}
+			at {request.updatedAt.toLocaleString()}.
 		</p>
 	{/if}
 {:else}
