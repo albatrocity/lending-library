@@ -1,3 +1,5 @@
+Read through the ADR entries to get a sense of architectural decisions. Adhere to these decisions for any generated code. If you introduce a new pattern, or otherwise something that would be considered an architectural decision, add a record to this directory. Always strive to keep these records up to date.
+
 You are able to use the Svelte MCP server, where you have access to comprehensive Svelte 5 and SvelteKit documentation. Here's how to use the available tools effectively:
 
 ## Available MCP Tools:
