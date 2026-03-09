@@ -51,6 +51,10 @@
 	const combobox = useCombobox(() => ({
 		id: 'tags-combobox-listbox',
 		collection,
+		// The rendered control element ends up with the TagsInput's control ID
+		// (mergeProps overwrites with the later arg). Point the Combobox machine
+		// at that same ID so getControlEl() can find the anchor for positioning.
+		ids: { control: tagsInput().getControlProps().id ?? undefined },
 		allowCustomValue: true,
 		selectionBehavior: 'clear',
 		onValueChange: ({ value }) => {
