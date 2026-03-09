@@ -48,6 +48,7 @@
 		"vitest-browser-svelte": "^2.0.2"
 	},
 	"dependencies": {
+		"@ark-ui/svelte": "^5.19.1",
 		"pg": "^8.18.0",
 		"postgres": "^3.4.8"
 	}
