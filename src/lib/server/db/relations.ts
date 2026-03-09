@@ -109,6 +109,20 @@ export const relations = defineRelations(
 				from: r.borrowRequests.itemId,
 				to: r.items.id
 			})
+		},
+		borrows: {
+			item: r.one.items({
+				from: r.borrows.itemId,
+				to: r.items.id
+			}),
+			borrower: r.one.user({
+				from: r.borrows.borrowerId,
+				to: r.user.id
+			}),
+			lender: r.one.user({
+				from: r.borrows.lenderId,
+				to: r.user.id
+			})
 		}
 	})
 );

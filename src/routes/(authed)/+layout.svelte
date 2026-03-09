@@ -1,6 +1,7 @@
 <script lang="ts">
 	let { children, data } = $props();
 	import { enhance } from '$app/forms';
+	import { resolve } from '$app/paths';
 </script>
 
 <div>
@@ -10,9 +11,9 @@
 
 	<nav>
 		<ul>
-			<li><a href="/items">Items</a></li>
-			<li><a href="/communities">Communities</a></li>
-			<li><a href="/requests">Requests</a></li>
+			<li><a href={resolve('/(authed)/items')}>Items</a></li>
+			<li><a href={resolve('/(authed)/communities')}>Communities</a></li>
+			<li><a href={resolve('/(authed)/requests')}>Requests</a></li>
 		</ul>
 	</nav>
 	<form method="post" action="/logout" use:enhance>
