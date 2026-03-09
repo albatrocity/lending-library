@@ -141,3 +141,10 @@ export const rejectBorrowRequest = async (id: number) => {
 		.set({ status: 'rejected' })
 		.where(eq(borrowRequests.id, id));
 };
+
+export const cancelBorrowRequest = async (id: number) => {
+	return await db
+		.update(borrowRequests)
+		.set({ status: 'cancelled' })
+		.where(eq(borrowRequests.id, id));
+};

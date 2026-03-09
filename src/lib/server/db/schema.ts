@@ -16,7 +16,8 @@ import { user } from './auth.schema';
 export const borrowRequestStatus = pgEnum('borrowRequestStatus', [
 	'pending',
 	'accepted',
-	'rejected'
+	'rejected',
+	'cancelled'
 ]);
 
 export const borrowStatus = pgEnum('borrowStatus', ['pending', 'active', 'returned', 'cancelled']);
