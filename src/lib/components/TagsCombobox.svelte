@@ -22,6 +22,10 @@
 	} from '@ark-ui/svelte/combobox';
 	import { Portal } from '@ark-ui/svelte/portal';
 	import { tick } from 'svelte';
+	import type { HTMLAttributes, SvelteHTMLElements } from 'svelte/elements';
+	type PropsFn<T extends keyof SvelteHTMLElements> = (
+		props?: SvelteHTMLElements[T]
+	) => HTMLAttributes<HTMLElement>;
 
 	type Tag = { id: number; name: string };
 
@@ -30,7 +34,12 @@
 		initialTags = [],
 		creatable = true,
 		onchange
-	}: { topTags: Tag[]; initialTags?: { name: string }[]; creatable?: boolean; onchange?: () => void } = $props();
+	}: {
+		topTags: Tag[];
+		initialTags?: { name: string }[];
+		creatable?: boolean;
+		onchange?: () => void;
+	} = $props();
 
 	let searchResults = $state<Tag[] | null>(null);
 	let inputValue = $state('');
@@ -100,7 +109,7 @@
 <TagsInputRootProvider value={tagsInput}>
 	<ComboboxRootProvider value={combobox}>
 		<TagsInputControl>
-			{#snippet asChild(tagsInputControlProps)}
+			{#snippet asChild(tagsInputControlProps: PropsFn<'div'>)}
 				<ComboboxControl {...tagsInputControlProps()}>
 					{#each tagsInput().value as tag, index (tag)}
 						<TagsInputItem {index} value={tag}>
@@ -111,7 +120,7 @@
 						</TagsInputItem>
 					{/each}
 					<TagsInputInput placeholder="Add tags...">
-						{#snippet asChild(tagsInputProps)}
+						{#snippet asChild(tagsInputProps: PropsFn<'input'>)}
 							<ComboboxInput {...tagsInputProps()} />
 						{/snippet}
 					</TagsInputInput>
