@@ -2,6 +2,7 @@ import {
 	getBorrowRequestsFromUser,
 	getBorrowRequestsForUser
 } from '$lib/server/services/borrowRequestsService';
+import { getActiveBorrowsForBorrower } from '$lib/server/services/borrowsService';
 import { redirect } from '@sveltejs/kit';
 
 export const load = async ({ locals }) => {
@@ -9,8 +10,17 @@ export const load = async ({ locals }) => {
 		return redirect(302, '/login');
 	}
 
-	const incomingRequests = await getBorrowRequestsForUser(locals.user.id, 'pending');
-	const outgoingRequests = await getBorrowRequestsFromUser(locals.user.id, 'pending');
+	const [incomingRequests, pendingOutgoing, acceptedOutgoing, activeBorrows] = await Promise.all([
+		getBorrowRequestsForUser(locals.user.id, 'pending'),
+		getBorrowRequestsFromUser(locals.user.id, 'pending'),
+		getBorrowRequestsFromUser(locals.user.id, 'accepted'),
+		getActiveBorrowsForBorrower(locals.user.id)
+	]);
 
-	return { incomingRequests, outgoingRequests };
+	const activeBorrowRequestIds = new Set(
+		activeBorrows.map((b) => b.borrowRequestId).filter((id) => id !== null)
+	);
+	const readyToPickUp = acceptedOutgoing.filter((r) => !activeBorrowRequestIds.has(r.id));
+
+	return { incomingRequests, pendingOutgoing, readyToPickUp, activeBorrows };
 };

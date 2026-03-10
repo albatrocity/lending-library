@@ -12,9 +12,7 @@ import { eq, inArray, and, notInArray } from 'drizzle-orm';
 
 export const getCommunitiesCreatedByUserId = async (userId: string) => {
 	return await db.query.communities.findMany({
-		where: {
-			ownerId: userId
-		}
+		where: (t, { eq }) => eq(t.ownerId, userId)
 	});
 };
 
@@ -41,7 +39,7 @@ export const createCommunity = async (data: CreateCommunity & { ownerId: string 
 
 export const getCommunityById = async (id: number) => {
 	const community = await db.query.communities.findFirst({
-		where: { id }
+		where: (t, { eq }) => eq(t.id, id)
 	});
 
 	if (!community) {
