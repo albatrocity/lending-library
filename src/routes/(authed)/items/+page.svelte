@@ -23,12 +23,24 @@
 			? data.topTags.find((t: { id: number; name: string }) => t.id === data.filters.tagId)
 			: undefined
 	);
+
+	let formEl = $state<HTMLFormElement>();
+	let searchDebounceTimer: ReturnType<typeof setTimeout>;
+
+	function submitForm() {
+		formEl?.requestSubmit();
+	}
+
+	function onSearchInput() {
+		clearTimeout(searchDebounceTimer);
+		searchDebounceTimer = setTimeout(submitForm, 300);
+	}
 </script>
 
-<form method="get" action="">
+<form method="get" action="" bind:this={formEl} onchange={submitForm} data-sveltekit-keepfocus data-sveltekit-noscroll>
 	<Fieldset legend="Filters">
 		<Field label="Search">
-			<FieldInput name="q" value={data.filters.search ?? ''} placeholder="Search by title..." />
+			<FieldInput name="q" value={data.filters.search ?? ''} placeholder="Search by title..." oninput={onSearchInput} onchange={null} />
 		</Field>
 
 		<Field label="Community">
@@ -67,7 +79,7 @@
 			</CheckboxRoot>
 		</div>
 
-		<button type="submit">Apply Filters</button>
+		<noscript><button type="submit">Apply Filters</button></noscript>
 	</Fieldset>
 </form>
 
