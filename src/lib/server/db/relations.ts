@@ -9,7 +9,8 @@ import {
 	user,
 	communities,
 	communityMemberships,
-	communityItems
+	communityItems,
+	activities
 } from './schema';
 
 import { session, account } from './auth.schema';
@@ -66,7 +67,8 @@ export const itemsRelations = relations(items, ({ one, many }) => ({
 	images: many(images),
 	lender: one(user, { fields: [items.ownerId], references: [user.id] }),
 	borrows: many(borrows),
-	borrowRequests: many(borrowRequests)
+	borrowRequests: many(borrowRequests),
+	activities: many(activities)
 }));
 
 export const imagesRelations = relations(images, () => ({}));
@@ -92,4 +94,13 @@ export const borrowsRelations = relations(borrows, ({ one }) => ({
 		references: [user.id],
 		relationName: 'lender'
 	})
+}));
+
+export const activitiesRelations = relations(activities, ({ one }) => ({
+	actor: one(user, { fields: [activities.actorId], references: [user.id] }),
+	community: one(communities, {
+		fields: [activities.communityId],
+		references: [communities.id]
+	}),
+	subject: one(items, { fields: [activities.subjectId], references: [items.id] })
 }));

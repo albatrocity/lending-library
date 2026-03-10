@@ -4,37 +4,37 @@ overview: Add an append-only activity stream table and service, integrate it int
 todos:
   - id: schema
     content: Add activity enums and activities table to schema.ts
-    status: pending
+    status: completed
   - id: relations
     content: Wire up activity relations in relations.ts
-    status: pending
+    status: completed
   - id: zod
     content: Create Zod schemas for activity validation in src/lib/schemas/activities.ts
-    status: pending
+    status: completed
   - id: service
     content: Create activityService.ts with recordActivity, recordItemActivity, and getItemActivity
-    status: pending
+    status: completed
   - id: integrate-borrow-requests
     content: Integrate activity recording into borrowRequestsService (create, accept, reject, cancel)
-    status: pending
+    status: completed
   - id: integrate-borrows
     content: Integrate activity recording into borrowsService (activateBorrow)
-    status: pending
+    status: completed
   - id: item-detail-load
     content: Add activity data to item detail page load function
-    status: pending
+    status: completed
   - id: item-detail-ui
     content: Add activity timeline UI to item detail page
-    status: pending
+    status: completed
   - id: migration
     content: Generate and apply Drizzle migration
-    status: pending
+    status: completed
   - id: adr
     content: Add ADR for activity stream pattern
-    status: pending
+    status: completed
   - id: agent-rules
     content: Update CLAUDE.md and AGENTS.md with activity tracking guidance
-    status: pending
+    status: completed
 isProject: false
 ---
 
