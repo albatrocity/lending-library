@@ -34,6 +34,7 @@ todos:
     status: pending
   - id: agent-rules
     content: Update CLAUDE.md and AGENTS.md with activity tracking guidance
+    status: pending
 isProject: false
 ---
 
@@ -44,6 +45,7 @@ isProject: false
 Add to `[src/lib/server/db/schema.ts](src/lib/server/db/schema.ts)`:
 
 - New enums: `actorType` (`user`, `system`), `activitySubjectType` (`item`), `activityType` (`requested`, `accepted`, `rejected`, `cancelled`, `borrowed`, `returned`), `activityRelatedType` (`borrowRequest`, `borrow`)
+- **Important**: In stable drizzle-orm (0.45.x), enum columns require an explicit column name argument, e.g. `actorType('actor_type').notNull()`, not `actorType().notNull()`.
 - New table `activities`:
 
 ```
@@ -77,11 +79,21 @@ The trade-off is more rows, but activity tables are append-only and the cardinal
 
 ## Relations
 
-Update `[src/lib/server/db/relations.ts](src/lib/server/db/relations.ts)` to add:
+Update `[src/lib/server/db/relations.ts](src/lib/server/db/relations.ts)`. Relations use the stable 0.x per-table `relations()` API (not `defineRelations`).
 
-- `activities.actor` -> one user (where actorType = 'user')
-- `activities.community` -> one community
-- Items relation: `items.activities` -> many activities (via subjectId where subjectType = 'item')
+Add a new export:
+
+```ts
+export const activitiesRelations = relations(activities, ({ one }) => ({
+	actor: one(user, { fields: [activities.actorId], references: [user.id] }),
+	community: one(communities, { fields: [activities.communityId], references: [communities.id] }),
+	subject: one(items, { fields: [activities.subjectId], references: [items.id] })
+}));
+```
+
+Update the existing `itemsRelations` to add `activities: many(activities)`.
+
+Note: The polymorphic filtering (actorType = 'user', subjectType = 'item') is NOT supported at the relation definition level in stable drizzle. Apply these filters at query time instead.
 
 ## Service: `activityService.ts`
 
@@ -113,6 +125,7 @@ The `DISTINCT ON` with the `NULLS LAST` ordering ensures that when fan-out produ
 
 New file at `[src/lib/schemas/activities.ts](src/lib/schemas/activities.ts)`:
 
+- Import from `drizzle-zod` (not `drizzle-orm/zod`) -- e.g. `import { createInsertSchema } from 'drizzle-zod'`
 - `createActivitySchema` -- validates service input
 - Discriminated union on `activityType` for metadata shape validation (can start simple and extend)
 
@@ -122,7 +135,6 @@ New file at `[src/lib/schemas/activities.ts](src/lib/schemas/activities.ts)`:
 
 Modify these functions to call `recordItemActivity` inside their existing transactions (or wrap in a new transaction where one doesn't exist):
 
-
 | Function              | Activity type | Message                                |
 | --------------------- | ------------- | -------------------------------------- |
 | `createBorrowRequest` | `requested`   | "{actor} requested to borrow {item}"   |
@@ -130,20 +142,21 @@ Modify these functions to call `recordItemActivity` inside their existing transa
 | `rejectBorrowRequest` | `rejected`    | "{actor} rejected the borrow request"  |
 | `cancelBorrowRequest` | `cancelled`   | "{actor} cancelled the borrow request" |
 
-
 Each call passes the borrow request ID as `relatedId` with `relatedType: 'borrowRequest'`.
 
 ### `[src/lib/server/services/borrowsService.ts](src/lib/server/services/borrowsService.ts)`
-
 
 | Function         | Activity type | Message                     |
 | ---------------- | ------------- | --------------------------- |
 | `activateBorrow` | `borrowed`    | "{actor} received the item" |
 
-
 Passes the borrow ID as `relatedId` with `relatedType: 'borrow'`.
 
 Note: `acceptBorrowRequest` already creates the borrow row in a transaction. The `accepted` activity covers that transition; `borrowed` covers the separate delivery confirmation.
+
+### Query syntax note
+
+All relational queries in the service layer use the stable drizzle 0.x callback `where` syntax, e.g. `where: (t, { eq }) => eq(t.id, id)`, not the 1.0 beta object shorthand. Any new relational queries introduced by this feature should follow the same pattern.
 
 ### Actor context
 
@@ -189,4 +202,3 @@ Both files currently instruct agents to read ADRs and adhere to architectural de
 > When implementing new features that involve state changes on items (or other trackable subjects), record activity events using the `activityService`. See ADR 0003 for the activity stream pattern. New activity types should be added to the `activityType` enum and integrated into the relevant service functions.
 
 This goes in both `[CLAUDE.md](CLAUDE.md)` and `[AGENTS.md](AGENTS.md)`, below the existing first paragraph (before the MCP tools section).
-
