@@ -35,7 +35,7 @@ export const searchTags = async (query?: string, limit?: number) => {
 export const getOrCreateTag = async (name: string): Promise<number> => {
 	const normalised = name.trim().toLowerCase();
 	await db.insert(tags).values({ name: normalised }).onConflictDoNothing();
-	const tag = await db.query.tags.findFirst({ where: { name: normalised } });
+	const tag = await db.query.tags.findFirst({ where: (t, { eq }) => eq(t.name, normalised) });
 	return tag!.id;
 };
 
