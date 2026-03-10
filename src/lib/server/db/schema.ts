@@ -83,7 +83,7 @@ export const images = pgTable(
 	{
 		id: serial('id').primaryKey(),
 		url: text('url').notNull(),
-		imageableType: imageableType().notNull(),
+		imageableType: imageableType('imageable_type').notNull(),
 		imageableId: integer('imageable_id').notNull(),
 		createdAt: timestamp('created_at').notNull().defaultNow(),
 		updatedAt: timestamp('updated_at').notNull().defaultNow()
@@ -122,7 +122,7 @@ export const borrowRequests = pgTable(
 		startDate: timestamp('start_date').notNull(),
 		endDate: timestamp('end_date'),
 		description: text('description'),
-		status: borrowRequestStatus().default('pending'),
+		status: borrowRequestStatus('status').default('pending'),
 		createdAt: timestamp('created_at').notNull().defaultNow(),
 		updatedAt: timestamp('updated_at').notNull().defaultNow()
 	},
@@ -149,7 +149,7 @@ export const borrows = pgTable(
 		startDate: timestamp('start_date').notNull(),
 		endDate: timestamp('end_date'),
 		returnDate: timestamp('return_date'),
-		status: borrowStatus().notNull().default('pending'),
+		status: borrowStatus('status').notNull().default('pending'),
 		createdAt: timestamp('created_at').notNull().defaultNow(),
 		updatedAt: timestamp('updated_at').notNull().defaultNow()
 	},

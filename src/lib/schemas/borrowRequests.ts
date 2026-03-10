@@ -1,4 +1,4 @@
-import { createInsertSchema, createUpdateSchema } from 'drizzle-orm/zod';
+import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { borrowRequests, borrowRequestStatus } from '$lib/server/db/schema';
 
 export const createBorrowRequestSchema = createInsertSchema(borrowRequests);
