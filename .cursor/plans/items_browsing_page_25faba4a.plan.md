@@ -4,40 +4,40 @@ overview: Move the current "my items" listing from `/items` to `/users/me/items`
 todos:
   - id: move-my-items
     content: Create /users/me/items route with current 'my items' page, server load, and layout
-    status: pending
+    status: completed
   - id: update-links
-    content: "Update all internal links to use resolveRoute from $app/paths: home nav, item create redirect, community item links, ItemListItem hrefs"
-    status: pending
+    content: 'Update all internal links to use resolveRoute from $app/paths: home nav, item create redirect, community item links, ItemListItem hrefs'
+    status: completed
   - id: items-service
     content: Add getItemsForUserCommunities() to itemsService with pagination and filtering (including availableToday)
-    status: pending
+    status: completed
   - id: owners-service
     content: Add getTopItemOwnersInUserCommunities() and searchCommunityMembers() to communitiesService
-    status: pending
+    status: completed
   - id: users-endpoint
     content: Create GET /users?q= endpoint for owner typeahead search
-    status: pending
+    status: completed
   - id: tags-combobox-creatable
     content: Add `creatable` prop to TagsCombobox.svelte (default true); when false, hide the "Create" option
-    status: pending
+    status: completed
   - id: community-combobox
     content: Create CommunityCombobox.svelte using Ark UI Combobox (single-select, from server data)
-    status: pending
+    status: completed
   - id: owner-combobox
     content: Create OwnerCombobox.svelte using Ark UI Combobox (single-select, debounced fetch to /users?q=)
-    status: pending
+    status: completed
   - id: pagination-component
     content: Create Pagination.svelte using Ark UI Pagination (link type with getPageUrl for search param preservation)
-    status: pending
+    status: completed
   - id: items-page
     content: Rewrite /items +page.server.ts (load with filters/pagination) and +page.svelte (filter form, item list, pagination)
-    status: pending
+    status: completed
   - id: update-item-list-item
     content: Add optional ownerName prop to ItemListItem.svelte
-    status: pending
+    status: completed
   - id: adr
     content: Add ADR documenting pagination and server-side filtering pattern
-    status: pending
+    status: completed
 isProject: false
 ---
 
@@ -80,28 +80,28 @@ Add to `[src/lib/server/services/itemsService.ts](src/lib/server/services/itemsS
 
 ```typescript
 type CommunityItemsParams = {
-  userId: string;
-  page?: number;
-  limit?: number;
-  tagId?: number;
-  communityId?: number;
-  ownerId?: string;
-  search?: string;
-  availableToday?: boolean;
+	userId: string;
+	page?: number;
+	limit?: number;
+	tagId?: number;
+	communityId?: number;
+	ownerId?: string;
+	search?: string;
+	availableToday?: boolean;
 };
 
 export const getItemsForUserCommunities = async (params: CommunityItemsParams) => {
-  // 1. Subquery: community IDs user belongs to
-  // 2. Subquery: item IDs in those communities (optionally filtered by communityId)
-  // 3. Main query: items matching those IDs
-  //    - LEFT JOIN tagsToItems + tags for tag data
-  //    - JOIN user for owner name/email
-  //    - WHERE filters: tagId, ownerId, ilike(items.name, search)
-  //    - When availableToday is true: exclude items that have a borrow with status='active'
-  //      (NOT EXISTS subquery on borrows where borrows.itemId = items.id AND borrows.status = 'active')
-  //    - COUNT(*) OVER() for total
-  //    - LIMIT/OFFSET for pagination
-  // Return { items, total, page, limit }
+	// 1. Subquery: community IDs user belongs to
+	// 2. Subquery: item IDs in those communities (optionally filtered by communityId)
+	// 3. Main query: items matching those IDs
+	//    - LEFT JOIN tagsToItems + tags for tag data
+	//    - JOIN user for owner name/email
+	//    - WHERE filters: tagId, ownerId, ilike(items.name, search)
+	//    - When availableToday is true: exclude items that have a borrow with status='active'
+	//      (NOT EXISTS subquery on borrows where borrows.itemId = items.id AND borrows.status = 'active')
+	//    - COUNT(*) OVER() for total
+	//    - LIMIT/OFFSET for pagination
+	// Return { items, total, page, limit }
 };
 ```
 
@@ -112,14 +112,12 @@ No naming conflict -- `getCommunityItems` in `communitiesService.ts` is a differ
 Add to `[src/lib/server/services/communitiesService.ts](src/lib/server/services/communitiesService.ts)`:
 
 ```typescript
-export const getTopItemOwnersInUserCommunities = async (
-  userId: string, limit = 10
-) => {
-  // Join communityMemberships -> communityItems -> items -> user
-  // WHERE communityId IN (user's communities)
-  // GROUP BY user.id, COUNT items DESC
-  // LIMIT 10
-  // Return [{ id, name, email, itemCount }]
+export const getTopItemOwnersInUserCommunities = async (userId: string, limit = 10) => {
+	// Join communityMemberships -> communityItems -> items -> user
+	// WHERE communityId IN (user's communities)
+	// GROUP BY user.id, COUNT items DESC
+	// LIMIT 10
+	// Return [{ id, name, email, itemCount }]
 };
 ```
 
@@ -128,12 +126,10 @@ export const getTopItemOwnersInUserCommunities = async (
 Add to `[src/lib/server/services/communitiesService.ts](src/lib/server/services/communitiesService.ts)`:
 
 ```typescript
-export const searchCommunityMembers = async (
-  userId: string, query: string, limit = 10
-) => {
-  // Users who share a community with userId
-  // WHERE ilike(name, query) OR ilike(email, query)
-  // Return [{ id, name, email }]
+export const searchCommunityMembers = async (userId: string, query: string, limit = 10) => {
+	// Users who share a community with userId
+	// WHERE ilike(name, query) OR ilike(email, query)
+	// Return [{ id, name, email }]
 };
 ```
 
@@ -249,6 +245,3 @@ flowchart TD
   OwnerInput -->|"debounced fetch"| Endpoint
   Endpoint -->|"JSON results"| OwnerInput
 ```
-
-
-

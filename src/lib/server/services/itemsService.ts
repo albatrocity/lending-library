@@ -1,5 +1,14 @@
 import { db } from '$lib/server/db';
-import { communityItems, communities, communityMemberships, items } from '$lib/server/db/schema';
+import {
+	communityItems,
+	communities,
+	communityMemberships,
+	items,
+	tags,
+	tagsToItems,
+	borrows,
+	user
+} from '$lib/server/db/schema';
 import {
 	createItemSchema,
 	createItemWithCommunitiesSchema,
@@ -7,7 +16,7 @@ import {
 } from '$lib/schemas/items';
 
 import type { z } from 'zod';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, ilike, notExists, count as drizzleCount } from 'drizzle-orm';
 
 export const getAllItems = async () => {
 	const results = await db.query.items.findMany({
@@ -94,6 +103,126 @@ export const getItemCommunities = async (itemId: number) => {
 		.from(communityItems)
 		.innerJoin(communities, eq(communityItems.communityId, communities.id))
 		.where(eq(communityItems.itemId, itemId));
+};
+
+type CommunityItemsParams = {
+	userId: string;
+	page?: number;
+	limit?: number;
+	tagId?: number;
+	communityId?: number;
+	ownerId?: string;
+	search?: string;
+	availableToday?: boolean;
+};
+
+export const getItemsForUserCommunities = async (params: CommunityItemsParams) => {
+	const { userId, page = 1, limit = 20, tagId, communityId, ownerId, search, availableToday } = params;
+
+	const userCommunityIds = db
+		.select({ id: communityMemberships.communityId })
+		.from(communityMemberships)
+		.where(eq(communityMemberships.userId, userId));
+
+	const communityItemIds = db
+		.select({ id: communityItems.itemId })
+		.from(communityItems)
+		.where(
+			communityId
+				? and(
+						inArray(communityItems.communityId, userCommunityIds),
+						eq(communityItems.communityId, communityId)
+					)
+				: inArray(communityItems.communityId, userCommunityIds)
+		);
+
+	const conditions = [inArray(items.id, communityItemIds)];
+
+	if (ownerId) {
+		conditions.push(eq(items.ownerId, ownerId));
+	}
+
+	if (search?.trim()) {
+		conditions.push(ilike(items.name, `%${search.trim()}%`));
+	}
+
+	if (tagId) {
+		const itemsWithTag = db
+			.select({ id: tagsToItems.itemId })
+			.from(tagsToItems)
+			.where(eq(tagsToItems.tagId, tagId));
+		conditions.push(inArray(items.id, itemsWithTag));
+	}
+
+	if (availableToday) {
+		conditions.push(
+			notExists(
+				db
+					.select({ id: borrows.id })
+					.from(borrows)
+					.where(and(eq(borrows.itemId, items.id), eq(borrows.status, 'active')))
+			)
+		);
+	}
+
+	const whereClause = and(...conditions);
+	const offset = (page - 1) * limit;
+
+	const [countResult, itemResults] = await Promise.all([
+		db
+			.select({ total: drizzleCount() })
+			.from(items)
+			.where(whereClause),
+		db
+			.select({
+				id: items.id,
+				name: items.name,
+				description: items.description,
+				ownerId: items.ownerId,
+				ownerName: user.name,
+				ownerEmail: user.email,
+				createdAt: items.createdAt,
+				updatedAt: items.updatedAt
+			})
+			.from(items)
+			.innerJoin(user, eq(items.ownerId, user.id))
+			.where(whereClause)
+			.orderBy(items.name)
+			.limit(limit)
+			.offset(offset)
+	]);
+
+	const total = countResult[0]?.total ?? 0;
+
+	const itemIds = itemResults.map((i) => i.id);
+	const tagRows =
+		itemIds.length > 0
+			? await db
+					.select({
+						itemId: tagsToItems.itemId,
+						tagId: tags.id,
+						tagName: tags.name,
+						tagCreatedAt: tags.createdAt,
+						tagUpdatedAt: tags.updatedAt
+					})
+					.from(tagsToItems)
+					.innerJoin(tags, eq(tagsToItems.tagId, tags.id))
+					.where(inArray(tagsToItems.itemId, itemIds))
+			: [];
+
+	const tagsByItem = new Map<number, { id: number; name: string; createdAt: Date; updatedAt: Date }[]>();
+	for (const row of tagRows) {
+		const arr = tagsByItem.get(row.itemId) ?? [];
+		arr.push({ id: row.tagId, name: row.tagName, createdAt: row.tagCreatedAt, updatedAt: row.tagUpdatedAt });
+		tagsByItem.set(row.itemId, arr);
+	}
+
+	const itemsWithTags = itemResults.map((item) => ({
+		...item,
+		tags: tagsByItem.get(item.id) ?? []
+	}));
+
+	return { items: itemsWithTags, total, page, limit };
 };
 
 export const getUserAccessToItem = async (userId: string, itemId: number) => {
