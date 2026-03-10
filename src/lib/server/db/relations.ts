@@ -1,4 +1,4 @@
-import { defineRelations } from 'drizzle-orm';
+import { relations } from 'drizzle-orm';
 import {
 	images,
 	tags,
@@ -14,115 +14,82 @@ import {
 
 import { session, account } from './auth.schema';
 
-export const relations = defineRelations(
-	{
-		tags,
-		items,
-		tagsToItems,
-		borrowRequests,
-		borrows,
-		user,
-		images,
-		session,
-		account,
-		communities,
-		communityMemberships,
-		communityItems
-	},
-	(r) => ({
-		communities: {
-			members: r.many.user({
-				from: r.communities.id.through(r.communityMemberships.communityId),
-				to: r.user.id.through(r.communityMemberships.userId)
-			}),
-			items: r.many.items({
-				from: r.communities.id.through(r.communityItems.communityId),
-				to: r.items.id.through(r.communityItems.itemId)
-			})
-		},
-		user: {
-			sessions: r.many.session(),
-			accounts: r.many.account(),
-			borrowRequests: r.many.borrowRequests({
-				from: r.user.id,
-				to: r.borrowRequests.userId
-			}),
-			borrows: r.many.borrows({
-				from: r.user.id,
-				to: r.borrows.borrowerId
-			}),
-			items: r.many.items({
-				from: r.user.id,
-				to: r.items.ownerId
-			})
-		},
-		session: {
-			user: r.one.user({
-				from: r.session.userId,
-				to: r.user.id
-			})
-		},
-		account: {
-			user: r.one.user({
-				from: r.account.userId,
-				to: r.user.id
-			})
-		},
-		tags: {
-			items: r.many.items({
-				from: r.tags.id.through(r.tagsToItems.tagId),
-				to: r.items.id.through(r.tagsToItems.itemId)
-			})
-		},
-		items: {
-			tags: r.many.tags(),
-			images: r.many.images({
-				from: r.items.id.through(r.images.imageableId),
-				to: r.images.imageableId.through(r.images.imageableId),
-				where: {
-					imageableType: 'items'
-				}
-			}),
-			lender: r.one.user({
-				from: r.items.ownerId,
-				to: r.user.id
-			}),
-			borrowers: r.many.user({
-				from: r.items.id.through(r.borrows.itemId),
-				to: r.user.id.through(r.borrows.borrowerId)
-			}),
-			borrows: r.many.borrows({
-				from: r.items.id,
-				to: r.borrows.itemId
-			}),
-			borrowRequests: r.many.borrowRequests({
-				from: r.items.id,
-				to: r.borrowRequests.itemId
-			})
-		},
-		borrowRequests: {
-			user: r.one.user({
-				from: r.borrowRequests.userId,
-				to: r.user.id
-			}),
-			item: r.one.items({
-				from: r.borrowRequests.itemId,
-				to: r.items.id
-			})
-		},
-		borrows: {
-			item: r.one.items({
-				from: r.borrows.itemId,
-				to: r.items.id
-			}),
-			borrower: r.one.user({
-				from: r.borrows.borrowerId,
-				to: r.user.id
-			}),
-			lender: r.one.user({
-				from: r.borrows.lenderId,
-				to: r.user.id
-			})
-		}
+export const communitiesRelations = relations(communities, ({ one, many }) => ({
+	owner: one(user, { fields: [communities.ownerId], references: [user.id] }),
+	memberships: many(communityMemberships),
+	communityItems: many(communityItems)
+}));
+
+export const communityMembershipsRelations = relations(communityMemberships, ({ one }) => ({
+	community: one(communities, {
+		fields: [communityMemberships.communityId],
+		references: [communities.id]
+	}),
+	user: one(user, { fields: [communityMemberships.userId], references: [user.id] })
+}));
+
+export const communityItemsRelations = relations(communityItems, ({ one }) => ({
+	community: one(communities, {
+		fields: [communityItems.communityId],
+		references: [communities.id]
+	}),
+	item: one(items, { fields: [communityItems.itemId], references: [items.id] })
+}));
+
+export const userRelations = relations(user, ({ many }) => ({
+	sessions: many(session),
+	accounts: many(account),
+	borrowRequests: many(borrowRequests),
+	borrows: many(borrows, { relationName: 'borrower' }),
+	items: many(items)
+}));
+
+export const sessionRelations = relations(session, ({ one }) => ({
+	user: one(user, { fields: [session.userId], references: [user.id] })
+}));
+
+export const accountRelations = relations(account, ({ one }) => ({
+	user: one(user, { fields: [account.userId], references: [user.id] })
+}));
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+	tagsToItems: many(tagsToItems)
+}));
+
+export const tagsToItemsRelations = relations(tagsToItems, ({ one }) => ({
+	tag: one(tags, { fields: [tagsToItems.tagId], references: [tags.id] }),
+	item: one(items, { fields: [tagsToItems.itemId], references: [items.id] })
+}));
+
+export const itemsRelations = relations(items, ({ one, many }) => ({
+	tagsToItems: many(tagsToItems),
+	images: many(images),
+	lender: one(user, { fields: [items.ownerId], references: [user.id] }),
+	borrows: many(borrows),
+	borrowRequests: many(borrowRequests)
+}));
+
+export const imagesRelations = relations(images, () => ({}));
+
+export const borrowRequestsRelations = relations(borrowRequests, ({ one }) => ({
+	user: one(user, { fields: [borrowRequests.userId], references: [user.id] }),
+	item: one(items, { fields: [borrowRequests.itemId], references: [items.id] })
+}));
+
+export const borrowsRelations = relations(borrows, ({ one }) => ({
+	borrowRequest: one(borrowRequests, {
+		fields: [borrows.borrowRequestId],
+		references: [borrowRequests.id]
+	}),
+	item: one(items, { fields: [borrows.itemId], references: [items.id] }),
+	borrower: one(user, {
+		fields: [borrows.borrowerId],
+		references: [user.id],
+		relationName: 'borrower'
+	}),
+	lender: one(user, {
+		fields: [borrows.lenderId],
+		references: [user.id],
+		relationName: 'lender'
 	})
-);
+}));

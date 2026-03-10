@@ -1,4 +1,4 @@
-import { createInsertSchema, createUpdateSchema } from 'drizzle-orm/zod';
+import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { items } from '$lib/server/db/schema';
 import { z } from 'zod';
 
