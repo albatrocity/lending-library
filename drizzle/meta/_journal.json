@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1773173623099,
+      "tag": "0000_amazing_thena",
+      "breakpoints": true
+    }
+  ]
+}

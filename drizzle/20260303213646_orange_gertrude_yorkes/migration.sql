@@ -1,1 +1,0 @@
-ALTER TYPE "borrowRequestStatus" ADD VALUE 'cancelled';
