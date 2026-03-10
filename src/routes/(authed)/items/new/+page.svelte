@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import TagsCombobox from '$lib/components/TagsCombobox.svelte';
 
 	let { form, data } = $props();
 
 	const communities = $derived(data.communities);
+	const topTags = $derived(data.topTags);
 </script>
 
 <div>
@@ -13,10 +15,12 @@
 		<input type="text" name="description" placeholder="Description" />
 
 		<select name="communityIds" multiple>
-			{#each communities as community}
+			{#each communities as community (community.id)}
 				<option value={community.id}>{community.name}</option>
 			{/each}
 		</select>
+
+		<TagsCombobox {topTags} />
 
 		<button type="submit">Create</button>
 	</form>

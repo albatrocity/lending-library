@@ -1,4 +1,5 @@
 import { createItemInCommunities } from '$lib/server/services/itemsService';
+import { searchTags, setItemTags } from '$lib/server/services/tagsService';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { createItemWithCommunitiesSchema } from '$lib/schemas/items';
@@ -7,9 +8,12 @@ import { getUserCommunities } from '$lib/server/services/communitiesService';
 export const load: PageServerLoad = async ({ parent }) => {
 	const { user } = await parent();
 
-	const communities = await getUserCommunities(user.id);
+	const [communities, topTags] = await Promise.all([
+		getUserCommunities(user.id),
+		searchTags(undefined, 10)
+	]);
 
-	return { communities };
+	return { communities, topTags };
 };
 
 export const actions: Actions = {
@@ -21,6 +25,7 @@ export const actions: Actions = {
 		const rawFormData = await event.request.formData();
 		const formData = Object.fromEntries(rawFormData);
 		const communityIds = rawFormData.getAll('communityIds').map(Number);
+		const tagNames = rawFormData.getAll('tags').map(String);
 
 		const { data, success, error } = createItemWithCommunitiesSchema.safeParse({
 			...formData,
@@ -32,7 +37,8 @@ export const actions: Actions = {
 			return fail(400, { errors: error?.message ?? 'Invalid data' });
 		}
 
-		await createItemInCommunities(data);
+		const item = await createItemInCommunities(data);
+		await setItemTags(item.id, tagNames);
 
 		redirect(302, '/items');
 	}
