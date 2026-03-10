@@ -13,13 +13,15 @@
 		createListCollection
 	} from '@ark-ui/svelte/combobox';
 	import { Portal } from '@ark-ui/svelte/portal';
+	import { tick } from 'svelte';
 
 	type Owner = { id: string; name: string; email: string };
 
 	let {
 		topOwners,
-		selectedOwnerId
-	}: { topOwners: Owner[]; selectedOwnerId?: string } = $props();
+		selectedOwnerId,
+		onchange
+	}: { topOwners: Owner[]; selectedOwnerId?: string; onchange?: () => void } = $props();
 
 	let searchResults = $state<Owner[] | null>(null);
 	let inputValue = $state('');
@@ -42,6 +44,10 @@
 		defaultValue: initialValue,
 		onInputValueChange: ({ inputValue: v }: { inputValue: string }) => {
 			inputValue = v;
+		},
+		onValueChange: async () => {
+			await tick();
+			onchange?.();
 		},
 		openOnClick: true
 	}));

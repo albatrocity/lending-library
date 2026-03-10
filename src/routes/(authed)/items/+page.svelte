@@ -47,6 +47,7 @@
 			<CommunityCombobox
 				communities={data.communities}
 				selectedCommunityId={data.filters.communityId}
+				onchange={submitForm}
 			/>
 		</Field>
 
@@ -55,6 +56,7 @@
 				topTags={data.topTags}
 				initialTags={selectedTag ? [{ name: selectedTag.name }] : []}
 				creatable={false}
+				onchange={submitForm}
 			/>
 		</Field>
 
@@ -62,6 +64,7 @@
 			<OwnerCombobox
 				topOwners={data.topOwners}
 				selectedOwnerId={data.filters.ownerId}
+				onchange={submitForm}
 			/>
 		</Field>
 

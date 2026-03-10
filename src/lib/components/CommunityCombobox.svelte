@@ -13,13 +13,15 @@
 		createListCollection
 	} from '@ark-ui/svelte/combobox';
 	import { Portal } from '@ark-ui/svelte/portal';
+	import { tick } from 'svelte';
 
 	type Community = { id: number; name: string };
 
 	let {
 		communities,
-		selectedCommunityId
-	}: { communities: Community[]; selectedCommunityId?: number } = $props();
+		selectedCommunityId,
+		onchange
+	}: { communities: Community[]; selectedCommunityId?: number; onchange?: () => void } = $props();
 
 	let inputValue = $state('');
 
@@ -45,6 +47,10 @@
 		defaultValue: initialValue,
 		onInputValueChange: ({ inputValue: v }: { inputValue: string }) => {
 			inputValue = v;
+		},
+		onValueChange: async () => {
+			await tick();
+			onchange?.();
 		},
 		openOnClick: true
 	}));

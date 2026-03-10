@@ -21,14 +21,16 @@
 		createListCollection
 	} from '@ark-ui/svelte/combobox';
 	import { Portal } from '@ark-ui/svelte/portal';
+	import { tick } from 'svelte';
 
 	type Tag = { id: number; name: string };
 
 	let {
 		topTags,
 		initialTags = [],
-		creatable = true
-	}: { topTags: Tag[]; initialTags?: { name: string }[]; creatable?: boolean } = $props();
+		creatable = true,
+		onchange
+	}: { topTags: Tag[]; initialTags?: { name: string }[]; creatable?: boolean; onchange?: () => void } = $props();
 
 	let searchResults = $state<Tag[] | null>(null);
 	let inputValue = $state('');
@@ -40,6 +42,10 @@
 		defaultValue: initialTags.map((t) => t.name),
 		onInputValueChange: ({ inputValue: v }) => {
 			inputValue = v;
+		},
+		onValueChange: async () => {
+			await tick();
+			onchange?.();
 		}
 	}));
 

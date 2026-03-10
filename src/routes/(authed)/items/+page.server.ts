@@ -15,8 +15,8 @@ export const load: PageServerLoad = async ({ parent, url }) => {
 	const communityId = url.searchParams.get('community')
 		? Number(url.searchParams.get('community'))
 		: undefined;
-	const ownerId = url.searchParams.get('owner') ?? undefined;
-	const search = url.searchParams.get('q') ?? undefined;
+	const ownerId = url.searchParams.get('owner') || undefined;
+	const search = url.searchParams.get('q') || undefined;
 	const availableToday = url.searchParams.get('available') === '1';
 
 	const [result, communities, topOwners, topTags] = await Promise.all([
