@@ -10,22 +10,24 @@ import type { z } from 'zod';
 import { and, eq, inArray } from 'drizzle-orm';
 
 export const getAllItems = async () => {
-	return await db.query.items.findMany({
-		with: {
-			tags: true
-		}
+	const results = await db.query.items.findMany({
+		with: { tagsToItems: { with: { tag: true } } }
 	});
+	return results.map(({ tagsToItems, ...rest }) => ({
+		...rest,
+		tags: tagsToItems.map((t) => t.tag)
+	}));
 };
 
 export const getAllItemsByOwnerId = async (ownerId: string) => {
-	return await db.query.items.findMany({
-		with: {
-			tags: true
-		},
-		where: {
-			ownerId
-		}
+	const results = await db.query.items.findMany({
+		with: { tagsToItems: { with: { tag: true } } },
+		where: (t, { eq }) => eq(t.ownerId, ownerId)
 	});
+	return results.map(({ tagsToItems, ...rest }) => ({
+		...rest,
+		tags: tagsToItems.map((t) => t.tag)
+	}));
 };
 
 export const createItem = async (payload: z.infer<typeof createItemSchema>) => {
@@ -66,14 +68,13 @@ export const deleteItem = async (id: number) => {
 };
 
 export const getItem = async (id: number) => {
-	return await db.query.items.findFirst({
-		where: {
-			id: id
-		},
-		with: {
-			tags: true
-		}
+	const result = await db.query.items.findFirst({
+		where: (t, { eq }) => eq(t.id, id),
+		with: { tagsToItems: { with: { tag: true } } }
 	});
+	if (!result) return undefined;
+	const { tagsToItems, ...rest } = result;
+	return { ...rest, tags: tagsToItems.map((t) => t.tag) };
 };
 
 export const updateItem = async (id: number, payload: z.infer<typeof updateItemSchema>) => {

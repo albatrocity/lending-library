@@ -11,9 +11,7 @@ import { eq, and } from 'drizzle-orm';
 
 export const getBorrowRequestsByItemId = async (itemId: number) => {
 	return await db.query.borrowRequests.findMany({
-		where: {
-			itemId: itemId
-		},
+		where: (t, { eq }) => eq(t.itemId, itemId),
 		orderBy: (t, { desc }) => [desc(t.createdAt)]
 	});
 };
@@ -43,17 +41,13 @@ export const deleteBorrowRequest = async (id: number) => {
 
 export const getBorrowRequest = async (id: number) => {
 	return await db.query.borrowRequests.findFirst({
-		where: {
-			id: id
-		}
+		where: (t, { eq }) => eq(t.id, id)
 	});
 };
 
 export const getBorrowRequestWithRelations = async (id: number) => {
 	return await db.query.borrowRequests.findFirst({
-		where: {
-			id: id
-		},
+		where: (t, { eq }) => eq(t.id, id),
 		with: { user: true, item: true }
 	});
 };
@@ -77,11 +71,12 @@ export const getUserItemBorrowRequest = async (payload: {
 	status: BorrowRequestStatus;
 }) => {
 	return await db.query.borrowRequests.findFirst({
-		where: {
-			userId: payload.userId,
-			itemId: payload.itemId,
-			status: payload.status
-		}
+		where: (t, { eq, and }) =>
+			and(
+				eq(t.userId, payload.userId),
+				eq(t.itemId, payload.itemId),
+				eq(t.status, payload.status)
+			)
 	});
 };
 
@@ -90,8 +85,13 @@ export const getBorrowRequestsForUser = async (
 	status: BorrowRequestStatus = 'pending'
 ) => {
 	const items = await db.query.items.findMany({
-		where: { ownerId: userId },
-		with: { borrowRequests: { with: { user: true }, where: { status } } }
+		where: (t, { eq }) => eq(t.ownerId, userId),
+		with: {
+			borrowRequests: {
+				with: { user: true },
+				where: (t, { eq }) => eq(t.status, status)
+			}
+		}
 	});
 
 	return items.filter((item) => item.borrowRequests.length > 0);
@@ -102,7 +102,7 @@ export const getBorrowRequestsFromUser = async (
 	status: BorrowRequestStatus = 'pending'
 ) => {
 	return await db.query.borrowRequests.findMany({
-		where: { userId, status },
+		where: (t, { eq, and }) => and(eq(t.userId, userId), eq(t.status, status)),
 		with: { user: true, item: true }
 	});
 };
@@ -118,9 +118,7 @@ export const acceptBorrowRequest = async (id: number) => {
 		).at(0);
 
 		const item = await tx.query.items.findFirst({
-			where: {
-				id: borrowRequest!.itemId
-			}
+			where: (t, { eq }) => eq(t.id, borrowRequest!.itemId)
 		});
 
 		await tx.insert(borrows).values({
