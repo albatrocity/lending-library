@@ -3,7 +3,8 @@
 
 	let { data } = $props();
 	const item = $derived(data.item);
+	const topTags = $derived(data.topTags);
 </script>
 
 <h1>Edit Item</h1>
-<ItemForm action="/items/{item.id}/edit" {item} />
+<ItemForm action="/items/{item.id}/edit" {item} {topTags} />
