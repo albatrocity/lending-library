@@ -3,7 +3,8 @@
 		FieldsetRoot,
 		FieldsetLegend,
 		FieldsetErrorText,
-		FieldsetHelperText
+		FieldsetHelperText,
+		type FieldsetRootBaseProps
 	} from '@ark-ui/svelte/fieldset';
 	import type { Snippet } from 'svelte';
 
@@ -14,13 +15,11 @@
 		errorText,
 		invalid = false,
 		disabled = false
-	}: {
+	}: FieldsetRootBaseProps & {
 		legend: string;
 		children: Snippet;
 		helperText?: string;
 		errorText?: string;
-		invalid?: boolean;
-		disabled?: boolean;
 	} = $props();
 </script>
 

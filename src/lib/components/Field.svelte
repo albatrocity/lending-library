@@ -3,7 +3,8 @@
 		FieldRoot,
 		FieldLabel,
 		FieldErrorText,
-		FieldHelperText
+		FieldHelperText,
+		type FieldRootBaseProps
 	} from '@ark-ui/svelte/field';
 	import type { Snippet } from 'svelte';
 
@@ -16,15 +17,11 @@
 		disabled = false,
 		required = false,
 		readOnly = false
-	}: {
+	}: FieldRootBaseProps & {
 		label: string;
 		children: Snippet;
 		helperText?: string;
 		errorText?: string;
-		invalid?: boolean;
-		disabled?: boolean;
-		required?: boolean;
-		readOnly?: boolean;
 	} = $props();
 </script>
 
