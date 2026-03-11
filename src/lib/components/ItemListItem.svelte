@@ -2,6 +2,7 @@
 	import type { Item } from '$lib/schemas/items';
 	import { enhance } from '$app/forms';
 	import type { Tag } from '$lib/schemas/tags';
+	import Button from '$lib/components/Button.svelte';
 
 	type ItemListItemProps = Item & {
 		currentUserId: string;
@@ -23,7 +24,7 @@
 		<a href="/items/{id}/edit">Edit</a>
 		<form method="post" action="/items/{id}/delete" use:enhance>
 			<input type="hidden" name="id" value={id} />
-			<button type="submit">Delete</button>
+			<Button type="submit" variant="outline">Delete</Button>
 		</form>
 	{/if}
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Button from '$lib/components/Button.svelte';
 
 	let { data, form } = $props();
 	const request = $derived(data.borrowRequest);
@@ -19,7 +20,7 @@
 				}
 			}}
 		>
-			<button type="submit">Cancel request</button>
+			<Button type="submit">Cancel request</Button>
 		</form>
 	{:else if request.status === 'accepted'}
 		<p>Your request was accepted on {request.updatedAt.toLocaleString()}.</p>
@@ -35,7 +36,7 @@
 					}
 				}}
 			>
-				<button type="submit">Mark as received</button>
+				<Button type="submit">Mark as received</Button>
 			</form>
 		{/if}
 	{:else}
@@ -54,10 +55,10 @@
 
 	{#if request.status === 'pending'}
 		<form method="post" action="?/accept" use:enhance>
-			<button type="submit">Accept</button>
+			<Button type="submit">Accept</Button>
 		</form>
 		<form method="post" action="?/reject" use:enhance>
-			<button type="submit">Reject</button>
+			<Button type="submit">Reject</Button>
 		</form>
 	{:else if request.status === 'accepted'}
 		<p>Accepted at {request.updatedAt.toLocaleString()}.</p>
@@ -73,7 +74,7 @@
 					}
 				}}
 			>
-				<button type="submit">Mark as delivered</button>
+				<Button type="submit">Mark as delivered</Button>
 			</form>
 		{/if}
 	{:else}

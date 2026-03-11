@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import TagsCombobox from '$lib/components/TagsCombobox.svelte';
+	import Button from '$lib/components/Button.svelte';
 
 	let { form, data } = $props();
 
@@ -22,11 +23,11 @@
 
 		<TagsCombobox {topTags} />
 
-		<button type="submit">Create</button>
+		<Button type="submit">Create</Button>
 	</form>
 
 	{#if form?.errors}
-		{#each form.errors as error}
+		{#each form.errors as error (error)}
 			<div>
 				<p>{error}</p>
 			</div>

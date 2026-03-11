@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Button from '$lib/components/Button.svelte';
 	let { data } = $props();
 	const item = $derived(data.item);
 	const borrowRequests = $derived(data.borrowRequests);
@@ -11,14 +12,14 @@
 	<input type="date" name="startDate" />
 	<input type="date" name="endDate" />
 	<textarea name="description" placeholder="Description"></textarea>
-	<button type="submit">Request to borrow</button>
+	<Button type="submit">Request to borrow</Button>
 </form>
 
 <h3>History</h3>
 
 {#if data.userOwnsItem}
 	<ul>
-		{#each borrowRequests as request}
+		{#each borrowRequests as request (request.id)}
 			<li>{request.startDate} - {request.endDate} - {request.status}</li>
 		{/each}
 	</ul>
