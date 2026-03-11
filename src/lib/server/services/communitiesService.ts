@@ -8,7 +8,7 @@ import {
 } from '$lib/server/db/schema';
 import type { CreateCommunity } from '$lib/schemas/communities';
 
-import { eq, inArray, and, notInArray } from 'drizzle-orm';
+import { eq, inArray, and, notInArray, ilike, or, desc, count } from 'drizzle-orm';
 
 export const getCommunitiesCreatedByUserId = async (userId: string) => {
 	return await db.query.communities.findMany({
@@ -185,4 +185,56 @@ export const removeItemFromCommunity = async (communityId: number, itemId: numbe
 	await db
 		.delete(communityItems)
 		.where(and(eq(communityItems.communityId, communityId), eq(communityItems.itemId, itemId)));
+};
+
+export const getTopItemOwnersInUserCommunities = async (userId: string, limit = 10) => {
+	const userCommunityIds = db
+		.select({ id: communityMemberships.communityId })
+		.from(communityMemberships)
+		.where(eq(communityMemberships.userId, userId));
+
+	return await db
+		.select({
+			id: user.id,
+			name: user.name,
+			email: user.email,
+			itemCount: count(items.id)
+		})
+		.from(communityItems)
+		.innerJoin(items, eq(communityItems.itemId, items.id))
+		.innerJoin(user, eq(items.ownerId, user.id))
+		.where(inArray(communityItems.communityId, userCommunityIds))
+		.groupBy(user.id, user.name, user.email)
+		.orderBy(desc(count(items.id)))
+		.limit(limit);
+};
+
+export const searchCommunityMembers = async (userId: string, query: string, limit = 10) => {
+	const userCommunityIds = db
+		.select({ id: communityMemberships.communityId })
+		.from(communityMemberships)
+		.where(eq(communityMemberships.userId, userId));
+
+	const fellowMemberIds = db
+		.select({ id: communityMemberships.userId })
+		.from(communityMemberships)
+		.where(inArray(communityMemberships.communityId, userCommunityIds));
+
+	const conditions = [inArray(user.id, fellowMemberIds)];
+
+	if (query.trim()) {
+		conditions.push(
+			or(ilike(user.name, `%${query.trim()}%`), ilike(user.email, `%${query.trim()}%`))!
+		);
+	}
+
+	return await db
+		.select({
+			id: user.id,
+			name: user.name,
+			email: user.email
+		})
+		.from(user)
+		.where(and(...conditions))
+		.limit(limit);
 };
