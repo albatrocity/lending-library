@@ -5,7 +5,7 @@
 </script>
 
 <div>
-	<h1>Items</h1>
+	<h1>My Items</h1>
 	<a href={resolve('/(authed)/items/new')}>New Item</a>
 	{@render children()}
 </div>

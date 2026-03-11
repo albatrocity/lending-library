@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
+	import { resolve } from '$app/paths';
 
 	let { data, form } = $props();
 	const item = $derived(data.item);
@@ -71,7 +72,7 @@
 			starting {data.pendingBorrowRequest.startDate.toLocaleDateString()}
 		</p>
 	{:else}
-		<a href="/items/{item.id}/borrow">Borrow this item</a>
+		<a href={resolve('/(authed)/items/[id]/borrow', { id: String(item.id) })}>Borrow this item</a>
 	{/if}
 {/if}
 

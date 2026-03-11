@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
+	import { resolve } from '$app/paths';
 
 	let { data, form } = $props();
 </script>
@@ -29,7 +30,7 @@
 	{:else}
 		<ul>
 			{#each data.items as item}
-				<a href="/items/{item.id}">
+				<a href={resolve('/(authed)/items/[id]', { id: String(item.id) })}>
 					<li>
 						<strong>{item.name}</strong>
 						{#if item.description}

@@ -1,12 +1,97 @@
 <script lang="ts">
 	import type { PageServerData } from './$types';
 	import ItemListItem from '$lib/components/ItemListItem.svelte';
+	import TagsCombobox from '$lib/components/TagsCombobox.svelte';
+	import CommunityCombobox from '$lib/components/CommunityCombobox.svelte';
+	import OwnerCombobox from '$lib/components/OwnerCombobox.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
+	import {
+		CheckboxRoot,
+		CheckboxControl,
+		CheckboxIndicator,
+		CheckboxLabel,
+		CheckboxHiddenInput
+	} from '@ark-ui/svelte/checkbox';
+	import { FieldInput } from '@ark-ui/svelte/field';
+	import Field from '$lib/components/Field.svelte';
+	import Fieldset from '$lib/components/Fieldset.svelte';
 
 	let { data }: { data: PageServerData } = $props();
+
+	const initialTags = $derived(
+		data.filters.tagNames.map((name: string) => ({ name }))
+	);
+
+	let formEl = $state<HTMLFormElement>();
+	let searchDebounceTimer: ReturnType<typeof setTimeout>;
+
+	function submitForm() {
+		formEl?.requestSubmit();
+	}
+
+	function onSearchInput() {
+		clearTimeout(searchDebounceTimer);
+		searchDebounceTimer = setTimeout(submitForm, 300);
+	}
 </script>
 
-<div>
-	{#each data.items as item}
-		<ItemListItem {...item} currentUserId={data.user.id} />
-	{/each}
-</div>
+<form method="get" action="" bind:this={formEl} onchange={submitForm} data-sveltekit-keepfocus data-sveltekit-noscroll>
+	<Fieldset legend="Filters">
+		<Field label="Search">
+			<FieldInput name="q" value={data.filters.search ?? ''} placeholder="Search by title..." oninput={onSearchInput} onchange={null} />
+		</Field>
+
+		<Field label="Community">
+			<CommunityCombobox
+				communities={data.communities}
+				selectedCommunityId={data.filters.communityId}
+				onchange={submitForm}
+			/>
+		</Field>
+
+		<Field label="Tags">
+			<TagsCombobox
+				topTags={data.topTags}
+				{initialTags}
+				creatable={false}
+				onchange={submitForm}
+			/>
+		</Field>
+
+		<Field label="Owner">
+			<OwnerCombobox
+				topOwners={data.topOwners}
+				selectedOwnerId={data.filters.ownerId}
+				onchange={submitForm}
+			/>
+		</Field>
+
+		<div>
+			<CheckboxRoot
+				name="available"
+				value="1"
+				defaultChecked={data.filters.availableToday}
+			>
+				<CheckboxControl>
+					<CheckboxIndicator>✓</CheckboxIndicator>
+				</CheckboxControl>
+				<CheckboxLabel>Available today</CheckboxLabel>
+				<CheckboxHiddenInput />
+			</CheckboxRoot>
+		</div>
+
+		<noscript><button type="submit">Apply Filters</button></noscript>
+	</Fieldset>
+</form>
+
+{#if data.items.length === 0}
+	<p>No items found matching your criteria.</p>
+{:else}
+	<div>
+		{#each data.items as item (item.id)}
+			<ItemListItem {...item} currentUserId={data.user.id} />
+		{/each}
+	</div>
+
+	<Pagination page={data.page} count={data.total} pageSize={data.limit} />
+{/if}
