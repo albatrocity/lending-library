@@ -8,7 +8,8 @@ import {
 	boolean,
 	index,
 	uniqueIndex,
-	integer
+	integer,
+	jsonb
 } from 'drizzle-orm/pg-core';
 
 import { user } from './auth.schema';
@@ -28,6 +29,21 @@ export const imageableType = pgEnum('imageableType', [
 	'borrowRequests',
 	'borrows'
 ]);
+
+export const actorType = pgEnum('actorType', ['user', 'system']);
+
+export const activitySubjectType = pgEnum('activitySubjectType', ['item']);
+
+export const activityType = pgEnum('activityType', [
+	'requested',
+	'accepted',
+	'rejected',
+	'cancelled',
+	'borrowed',
+	'returned'
+]);
+
+export const activityRelatedType = pgEnum('activityRelatedType', ['borrowRequest', 'borrow']);
 
 export const communities = pgTable('communities', {
 	id: serial('id').primaryKey(),
@@ -157,6 +173,32 @@ export const borrows = pgTable(
 		index('borrows_item_id_idx').on(t.itemId),
 		index('borrows_borrower_id_idx').on(t.borrowerId),
 		index('borrows_lender_id_idx').on(t.lenderId)
+	]
+);
+
+export const activities = pgTable(
+	'activities',
+	{
+		id: serial('id').primaryKey(),
+		actorId: text('actor_id').notNull(),
+		actorType: actorType('actor_type').notNull(),
+		subjectId: integer('subject_id').notNull(),
+		subjectType: activitySubjectType('subject_type').notNull(),
+		activityType: activityType('activity_type').notNull(),
+		communityId: integer('community_id')
+			.notNull()
+			.references(() => communities.id),
+		relatedId: integer('related_id'),
+		relatedType: activityRelatedType('related_type'),
+		message: text('message'),
+		occurredAt: timestamp('occurred_at').notNull().defaultNow(),
+		metadata: jsonb('metadata')
+	},
+	(t) => [
+		index('activities_subject_idx').on(t.subjectId, t.subjectType),
+		index('activities_actor_idx').on(t.actorId, t.actorType),
+		index('activities_community_id_idx').on(t.communityId),
+		index('activities_occurred_at_idx').on(t.occurredAt)
 	]
 );
 

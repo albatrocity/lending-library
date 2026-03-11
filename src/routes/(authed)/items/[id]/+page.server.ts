@@ -8,6 +8,7 @@ import {
 	addItemToCommunity,
 	removeItemFromCommunity
 } from '$lib/server/services/communitiesService';
+import { getItemActivity } from '$lib/server/services/activityService';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { getUserItemBorrowRequest } from '$lib/server/services/borrowRequestsService';
@@ -38,13 +39,16 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 		status: 'pending'
 	});
 
+	const activity = await getItemActivity(itemId, user.id);
+
 	return {
 		item,
 		user,
 		isOwner,
 		itemCommunities,
 		availableCommunities,
-		pendingBorrowRequest
+		pendingBorrowRequest,
+		activity
 	};
 };
 

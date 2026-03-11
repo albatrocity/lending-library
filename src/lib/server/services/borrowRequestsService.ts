@@ -5,6 +5,7 @@ import {
 	updateBorrowRequestSchema,
 	type BorrowRequestStatus
 } from '$lib/schemas/borrowRequests';
+import { recordItemActivity } from './activityService';
 
 import type { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
@@ -32,7 +33,24 @@ export const createBorrowRequest = async (payload: z.infer<typeof createBorrowRe
 		status: 'pending'
 	});
 
-	return (await db.insert(borrowRequests).values(params).returning()).at(0);
+	return await db.transaction(async (tx) => {
+		const borrowRequest = (await tx.insert(borrowRequests).values(params).returning()).at(0);
+
+		await recordItemActivity(
+			{
+				actorId: params.userId,
+				actorType: 'user',
+				itemId: params.itemId,
+				activityType: 'requested',
+				relatedId: borrowRequest!.id,
+				relatedType: 'borrowRequest',
+				message: 'Requested to borrow this item'
+			},
+			tx
+		);
+
+		return borrowRequest;
+	});
 };
 
 export const deleteBorrowRequest = async (id: number) => {
@@ -107,7 +125,7 @@ export const getBorrowRequestsFromUser = async (
 	});
 };
 
-export const acceptBorrowRequest = async (id: number) => {
+export const acceptBorrowRequest = async (id: number, actorId: string) => {
 	await db.transaction(async (tx) => {
 		const borrowRequest = (
 			await tx
@@ -130,19 +148,68 @@ export const acceptBorrowRequest = async (id: number) => {
 			...(borrowRequest!.endDate && { endDate: borrowRequest!.endDate }),
 			status: 'pending'
 		});
+
+		await recordItemActivity(
+			{
+				actorId,
+				actorType: 'user',
+				itemId: borrowRequest!.itemId,
+				activityType: 'accepted',
+				relatedId: borrowRequest!.id,
+				relatedType: 'borrowRequest',
+				message: 'Accepted the borrow request'
+			},
+			tx
+		);
 	});
 };
 
-export const rejectBorrowRequest = async (id: number) => {
-	return await db
-		.update(borrowRequests)
-		.set({ status: 'rejected' })
-		.where(eq(borrowRequests.id, id));
+export const rejectBorrowRequest = async (id: number, actorId: string) => {
+	await db.transaction(async (tx) => {
+		const borrowRequest = (
+			await tx
+				.update(borrowRequests)
+				.set({ status: 'rejected' })
+				.where(eq(borrowRequests.id, id))
+				.returning()
+		).at(0);
+
+		await recordItemActivity(
+			{
+				actorId,
+				actorType: 'user',
+				itemId: borrowRequest!.itemId,
+				activityType: 'rejected',
+				relatedId: borrowRequest!.id,
+				relatedType: 'borrowRequest',
+				message: 'Rejected the borrow request'
+			},
+			tx
+		);
+	});
 };
 
-export const cancelBorrowRequest = async (id: number) => {
-	return await db
-		.update(borrowRequests)
-		.set({ status: 'cancelled' })
-		.where(eq(borrowRequests.id, id));
+export const cancelBorrowRequest = async (id: number, actorId: string) => {
+	await db.transaction(async (tx) => {
+		const borrowRequest = (
+			await tx
+				.update(borrowRequests)
+				.set({ status: 'cancelled' })
+				.where(eq(borrowRequests.id, id))
+				.returning()
+		).at(0);
+
+		await recordItemActivity(
+			{
+				actorId,
+				actorType: 'user',
+				itemId: borrowRequest!.itemId,
+				activityType: 'cancelled',
+				relatedId: borrowRequest!.id,
+				relatedType: 'borrowRequest',
+				message: 'Cancelled the borrow request'
+			},
+			tx
+		);
+	});
 };
