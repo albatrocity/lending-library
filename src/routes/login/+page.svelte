@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
+	import Button from '$lib/components/Button.svelte';
 
 	let { form }: { form: ActionData } = $props();
 	let mode: 'signIn' | 'signUp' = $state('signIn');
@@ -15,7 +16,7 @@
 <form method="post" action="?/signInSocial" use:enhance>
 	<input type="hidden" name="provider" value="google" />
 	<input type="hidden" name="callbackURL" value="/" />
-	<button>Sign in with Google</button>
+	<Button type="submit">Sign in with Google</Button>
 </form>
 
 <hr />
@@ -30,11 +31,11 @@
 			Password
 			<input type="password" name="password" required />
 		</label>
-		<button>Sign in with Email</button>
+		<Button type="submit">Sign in with Email</Button>
 	</form>
 	<p>
 		Don't have an account?
-		<button type="button" onclick={() => (mode = 'signUp')}>Sign up</button>
+		<Button type="button" onclick={() => (mode = 'signUp')} variant="outline">Sign up</Button>
 	</p>
 {:else}
 	<form method="post" action="?/signUpEmail" use:enhance>
@@ -50,10 +51,10 @@
 			Password
 			<input type="password" name="password" required minlength="8" />
 		</label>
-		<button>Sign up</button>
+		<Button type="submit">Sign up</Button>
 	</form>
 	<p>
 		Already have an account?
-		<button type="button" onclick={() => (mode = 'signIn')}>Sign in</button>
+		<Button type="button" onclick={() => (mode = 'signIn')} variant="outline">Sign in</Button>
 	</p>
 {/if}

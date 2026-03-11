@@ -2,6 +2,7 @@
 	let { children, data } = $props();
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
+	import Button from '$lib/components/Button.svelte';
 </script>
 
 <div>
@@ -18,7 +19,7 @@
 		</ul>
 	</nav>
 	<form method="post" action="/logout" use:enhance>
-		<button type="submit">Sign out</button>
+		<Button type="submit" variant="outline">Sign out</Button>
 	</form>
 
 	{@render children()}

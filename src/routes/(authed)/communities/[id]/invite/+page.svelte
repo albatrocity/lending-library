@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Button from '$lib/components/Button.svelte';
 
 	let { data, form } = $props();
 </script>
@@ -15,7 +16,7 @@
 			<input type="email" id="email" name="email" required placeholder="Enter email address" />
 		</div>
 
-		<button type="submit">Invite</button>
+		<Button type="submit">Invite</Button>
 	</form>
 
 	{#if form?.error}
@@ -26,4 +27,3 @@
 		<p>Successfully invited {form.invitedEmail} to the community!</p>
 	{/if}
 </div>
-

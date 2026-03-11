@@ -1,8 +1,15 @@
 {
-	"mcpServers": {
-		"svelte": {
-			"type": "http",
-			"url": "https://mcp.svelte.dev/mcp"
-		}
-	}
+  "mcpServers": {
+    "svelte": {
+      "type": "http",
+      "url": "https://mcp.svelte.dev/mcp"
+    },
+    "panda": {
+      "command": "npx",
+      "args": [
+        "panda",
+        "mcp"
+      ]
+    }
+  }
 }

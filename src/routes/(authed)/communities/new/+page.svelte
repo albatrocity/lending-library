@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Button from '$lib/components/Button.svelte';
 
 	let { form } = $props();
 </script>
@@ -19,11 +20,10 @@
 			<textarea id="description" name="description"></textarea>
 		</div>
 
-		<button type="submit">Create Community</button>
+		<Button type="submit">Create Community</Button>
 	</form>
 
 	{#if form?.error}
 		<p>{form.error}</p>
 	{/if}
 </div>
-

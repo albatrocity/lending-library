@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Button from '$lib/components/Button.svelte';
 	import { resolve } from '$app/paths';
 
 	let { data, form } = $props();
@@ -40,7 +41,7 @@
 						{#if data.isOwner}
 							<form method="post" action="?/removeItem" use:enhance style="display: inline;">
 								<input type="hidden" name="itemId" value={item.id} />
-								<button type="submit">Remove</button>
+								<Button type="submit" variant="outline">Remove</Button>
 							</form>
 						{/if}
 					</li>

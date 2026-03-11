@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Button from '$lib/components/Button.svelte';
 
 	let { data, form } = $props();
 </script>
@@ -29,7 +30,7 @@
 				{/each}
 			</ul>
 
-			<button type="submit">Add Selected Items</button>
+			<Button type="submit">Add Selected Items</Button>
 		</form>
 	{/if}
 
@@ -41,4 +42,3 @@
 		<p>Successfully added {form.addedCount} item(s) to the community!</p>
 	{/if}
 </div>
-

@@ -21,6 +21,7 @@
 		createListCollection
 	} from '@ark-ui/svelte/combobox';
 	import { Portal } from '@ark-ui/svelte/portal';
+	import { combobox as comboboxRecipe, tagsInput as tagsInputRecipe } from 'styled-system/recipes';
 	import { tick } from 'svelte';
 	import type { HTMLAttributes, SvelteHTMLElements } from 'svelte/elements';
 	type PropsFn<T extends keyof SvelteHTMLElements> = (
@@ -92,6 +93,9 @@
 
 	const createOptionItem: Tag = $derived({ id: -1, name: inputValue.trim() });
 
+	const comboRecipe = comboboxRecipe();
+	const tagsRecipe = tagsInputRecipe();
+
 	$effect(() => {
 		const q = inputValue;
 		if (!q.trim()) {
@@ -108,20 +112,22 @@
 
 <TagsInputRootProvider value={tagsInput}>
 	<ComboboxRootProvider value={combobox}>
-		<TagsInputControl>
-			{#snippet asChild(tagsInputControlProps: PropsFn<'div'>)}
-				<ComboboxControl {...tagsInputControlProps()}>
+		<TagsInputControl class={tagsRecipe.control}>
+			{#snippet asChild(tagsInputControlProps)}
+				<ComboboxControl {...tagsInputControlProps()} class={comboRecipe.control}>
 					{#each tagsInput().value as tag, index (tag)}
-						<TagsInputItem {index} value={tag}>
-							<TagsInputItemPreview>
-								<TagsInputItemText>{tag}</TagsInputItemText>
-								<TagsInputItemDeleteTrigger>×</TagsInputItemDeleteTrigger>
+						<TagsInputItem {index} value={tag} class={tagsRecipe.item}>
+							<TagsInputItemPreview class={tagsRecipe.itemPreview}>
+								<TagsInputItemText class={tagsRecipe.itemText}>{tag}</TagsInputItemText>
+								<TagsInputItemDeleteTrigger class={tagsRecipe.itemDeleteTrigger}
+									>×</TagsInputItemDeleteTrigger
+								>
 							</TagsInputItemPreview>
 						</TagsInputItem>
 					{/each}
-					<TagsInputInput placeholder="Add tags...">
-						{#snippet asChild(tagsInputProps: PropsFn<'input'>)}
-							<ComboboxInput {...tagsInputProps()} />
+					<TagsInputInput placeholder="Add tags..." class={tagsRecipe.input}>
+						{#snippet asChild(tagsInputProps)}
+							<ComboboxInput {...tagsInputProps()} class={comboRecipe.input} />
 						{/snippet}
 					</TagsInputInput>
 				</ComboboxControl>
@@ -130,14 +136,14 @@
 
 		<Portal>
 			<ComboboxPositioner>
-				<ComboboxContent>
+				<ComboboxContent class={comboRecipe.content}>
 					{#each tagItems as item (item.name)}
-						<ComboboxItem {item}>
+						<ComboboxItem {item} class={comboRecipe.item}>
 							<ComboboxItemText>{item.name}</ComboboxItemText>
 						</ComboboxItem>
 					{/each}
 					{#if showCreateOption}
-						<ComboboxItem item={createOptionItem}>
+						<ComboboxItem item={createOptionItem} class={comboRecipe.item}>
 							<ComboboxItemText>+ Create "{inputValue.trim()}"</ComboboxItemText>
 						</ComboboxItem>
 					{/if}

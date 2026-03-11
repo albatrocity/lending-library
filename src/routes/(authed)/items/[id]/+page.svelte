@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Button from '$lib/components/Button.svelte';
 	import { resolve } from '$app/paths';
 
 	let { data, form } = $props();
@@ -26,7 +27,7 @@
 					{community.name}
 					<form method="post" action="?/removeFromCommunity" use:enhance style="display: inline;">
 						<input type="hidden" name="communityId" value={community.id} />
-						<button type="submit">Remove</button>
+						<Button type="submit" variant="outline">Remove</Button>
 					</form>
 				</li>
 			{/each}
@@ -51,7 +52,7 @@
 					<option value={community.id}>{community.name}</option>
 				{/each}
 			</select>
-			<button type="submit">Add to Community</button>
+			<Button type="submit">Add to Community</Button>
 		</form>
 	{/if}
 
