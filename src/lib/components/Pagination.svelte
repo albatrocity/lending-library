@@ -9,11 +9,7 @@
 	} from '@ark-ui/svelte/pagination';
 	import { page as pageStore } from '$app/state';
 
-	let {
-		page,
-		count,
-		pageSize
-	}: { page: number; count: number; pageSize: number } = $props();
+	let { page, count, pageSize }: { page: number; count: number; pageSize: number } = $props();
 
 	function getPageUrl(details: { page: number }) {
 		const url = new URL(pageStore.url);
@@ -32,7 +28,7 @@
 
 		<PaginationContext>
 			{#snippet render(context)}
-				{#each context().pages as p, idx}
+				{#each context().pages as p, idx (p.type)}
 					{#if p.type === 'page'}
 						<PaginationItem type="page" value={p.value}>{p.value}</PaginationItem>
 					{:else}
