@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
+	import { resolve } from '$app/paths';
 
 	let { data, form } = $props();
 	const item = $derived(data.item);
@@ -10,7 +11,7 @@
 {@html item.description}
 
 <ul>
-	{#each item.tags as tag}
+	{#each item.tags as tag (tag.id)}
 		<li>{tag.name}</li>
 	{/each}
 </ul>
@@ -21,7 +22,7 @@
 		<p>This item is not in any communities yet.</p>
 	{:else}
 		<ul>
-			{#each data.itemCommunities as community}
+			{#each data.itemCommunities as community (community.id)}
 				<li>
 					{community.name}
 					<form method="post" action="?/removeFromCommunity" use:enhance style="display: inline;">
@@ -47,7 +48,7 @@
 		<form method="post" action="?/assignToCommunity" use:enhance>
 			<select name="communityId" required>
 				<option value="">Select a community</option>
-				{#each data.availableCommunities as community}
+				{#each data.availableCommunities as community (community.id)}
 					<option value={community.id}>{community.name}</option>
 				{/each}
 			</select>
@@ -71,7 +72,7 @@
 			starting {data.pendingBorrowRequest.startDate.toLocaleDateString()}
 		</p>
 	{:else}
-		<a href="/items/{item.id}/borrow">Borrow this item</a>
+		<a href={resolve('/(authed)/items/[id]/borrow', { id: String(item.id) })}>Borrow this item</a>
 	{/if}
 {/if}
 
@@ -80,7 +81,7 @@
 	<p>No activity yet.</p>
 {:else}
 	<ul>
-		{#each data.activity as event}
+		{#each data.activity as event (event.id)}
 			<li>
 				<strong>{event.actorName}</strong>
 				&mdash; {event.message ?? event.activityType}

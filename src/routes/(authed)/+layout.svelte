@@ -12,7 +12,8 @@
 
 	<nav>
 		<ul>
-			<li><a href={resolve('/(authed)/items')}>Items</a></li>
+			<li><a href={resolve('/(authed)/items')}>Browse Items</a></li>
+			<li><a href={resolve('/(authed)/users/me/items')}>My Items</a></li>
 			<li><a href={resolve('/(authed)/communities')}>Communities</a></li>
 			<li><a href={resolve('/(authed)/requests')}>Requests</a></li>
 		</ul>

@@ -40,6 +40,6 @@ export const actions: Actions = {
 		const item = await createItemInCommunities(data);
 		await setItemTags(item.id, tagNames);
 
-		redirect(302, '/items');
+		redirect(302, '/users/me/items');
 	}
 };

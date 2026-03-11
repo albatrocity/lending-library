@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
+	import { resolve } from '$app/paths';
 
 	let { data, form } = $props();
 </script>
@@ -28,8 +29,8 @@
 		<p>No items in this community yet.</p>
 	{:else}
 		<ul>
-			{#each data.items as item}
-				<a href="/items/{item.id}">
+			{#each data.items as item (item.id)}
+				<a href={resolve('/(authed)/items/[id]', { id: String(item.id) })}>
 					<li>
 						<strong>{item.name}</strong>
 						{#if item.description}
@@ -59,7 +60,7 @@
 
 	<h2>Members ({data.community.members.length})</h2>
 	<ul>
-		{#each data.community.members as member}
+		{#each data.community.members as member (member.userId)}
 			<li>
 				{member.userName} ({member.userEmail})
 				{#if member.userId === data.community.ownerId}
