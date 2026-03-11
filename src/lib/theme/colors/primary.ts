@@ -1,7 +1,6 @@
 import { defineSemanticTokens } from '@pandacss/dev';
 
 export const primary = defineSemanticTokens.colors({
-	base: { value: { base: '{colors.lime.500}', _dark: '{colors.lime.700}' } },
 	solid: {
 		bg: {
 			DEFAULT: { value: { base: '{colors.lime.500}', _dark: '{colors.lime.700}' } },
