@@ -14,6 +14,7 @@
 	} from '@ark-ui/svelte/combobox';
 	import { Portal } from '@ark-ui/svelte/portal';
 	import { tick } from 'svelte';
+	import { combobox as comboboxRecipe } from 'styled-system/recipes';
 
 	type Community = { id: number; name: string };
 
@@ -56,23 +57,24 @@
 	}));
 
 	const selectedValue = $derived(combobox().value[0] ?? '');
+	const recipe = comboboxRecipe();
 </script>
 
 <ComboboxRootProvider value={combobox}>
-	<ComboboxControl>
-		<ComboboxInput placeholder="Filter by community..." />
-		<ComboboxTrigger>▼</ComboboxTrigger>
+	<ComboboxControl class={recipe.control}>
+		<ComboboxInput class={recipe.input} placeholder="Filter by community..." />
+		<ComboboxTrigger class={recipe.trigger}>▼</ComboboxTrigger>
 		{#if selectedValue}
-			<ComboboxClearTrigger>✕</ComboboxClearTrigger>
+			<ComboboxClearTrigger class={recipe.clearTrigger}>✕</ComboboxClearTrigger>
 		{/if}
 	</ComboboxControl>
 
 	<Portal>
-		<ComboboxPositioner>
-			<ComboboxContent>
+		<ComboboxPositioner class={recipe.positioner}>
+			<ComboboxContent class={recipe.content}>
 				{#each filteredItems as item (item.id)}
-					<ComboboxItem {item}>
-						<ComboboxItemText>{item.name}</ComboboxItemText>
+					<ComboboxItem {item} class={recipe.item}>
+						<ComboboxItemText class={recipe.itemText}>{item.name}</ComboboxItemText>
 					</ComboboxItem>
 				{/each}
 			</ComboboxContent>
