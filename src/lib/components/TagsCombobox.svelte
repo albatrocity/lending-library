@@ -70,7 +70,6 @@
 		// (mergeProps overwrites with the later arg). Point the Combobox machine
 		// at that same ID so getControlEl() can find the anchor for positioning.
 		ids: { control: tagsInput().getControlProps().id ?? undefined },
-		allowCustomValue: creatable,
 		selectionBehavior: 'clear',
 		onValueChange: ({ value }) => {
 			const selectedName = value[0];
