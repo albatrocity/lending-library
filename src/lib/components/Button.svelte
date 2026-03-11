@@ -11,6 +11,7 @@
 
 	const button = cva({
 		base: {
+			colorPalette: 'primary',
 			alignItems: 'center',
 			appearance: 'none',
 			borderRadius: 'l2',
