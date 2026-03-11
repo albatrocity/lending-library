@@ -74,3 +74,20 @@
 		<a href="/items/{item.id}/borrow">Borrow this item</a>
 	{/if}
 {/if}
+
+<h2>Activity</h2>
+{#if data.activity.length === 0}
+	<p>No activity yet.</p>
+{:else}
+	<ul>
+		{#each data.activity as event}
+			<li>
+				<strong>{event.actorName}</strong>
+				&mdash; {event.message ?? event.activityType}
+				<time datetime={event.occurredAt?.toISOString()}>
+					{event.occurredAt?.toLocaleDateString()}
+				</time>
+			</li>
+		{/each}
+	</ul>
+{/if}

@@ -30,21 +30,21 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 export const actions: Actions = {
 	accept: async (event) => {
-		const { params } = event;
-		const { id } = params;
-		await acceptBorrowRequest(Number(id));
+		const { params, locals } = event;
+		if (!locals.user) return error(401, 'Unauthorized');
+		await acceptBorrowRequest(Number(params.id), locals.user.id);
 		return { success: true };
 	},
 	reject: async (event) => {
-		const { params } = event;
-		const { id } = params;
-		await rejectBorrowRequest(Number(id));
+		const { params, locals } = event;
+		if (!locals.user) return error(401, 'Unauthorized');
+		await rejectBorrowRequest(Number(params.id), locals.user.id);
 		return { success: true };
 	},
 	cancel: async (event) => {
-		const { params } = event;
-		const { id } = params;
-		await cancelBorrowRequest(Number(id));
+		const { params, locals } = event;
+		if (!locals.user) return error(401, 'Unauthorized');
+		await cancelBorrowRequest(Number(params.id), locals.user.id);
 		return { success: true };
 	},
 	markReceived: async (event) => {
@@ -82,7 +82,7 @@ export const actions: Actions = {
 			return { delivered: true };
 		}
 
-		await activateBorrow(borrow.id);
+		await activateBorrow(borrow.id, user.id);
 		return { delivered: true };
 	}
 };

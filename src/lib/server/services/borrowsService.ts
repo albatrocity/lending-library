@@ -1,6 +1,7 @@
 import { db } from '$lib/server/db';
 import { borrows } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
+import { recordItemActivity } from './activityService';
 
 export const getBorrowByRequestId = async (borrowRequestId: number) => {
 	return await db.query.borrows.findFirst({
@@ -15,12 +16,29 @@ export const getActiveBorrowsForBorrower = async (borrowerId: string) => {
 	});
 };
 
-export const activateBorrow = async (id: number) => {
-	return (
-		await db
-			.update(borrows)
-			.set({ status: 'active', updatedAt: new Date() })
-			.where(eq(borrows.id, id))
-			.returning()
-	).at(0);
+export const activateBorrow = async (id: number, actorId: string) => {
+	return await db.transaction(async (tx) => {
+		const borrow = (
+			await tx
+				.update(borrows)
+				.set({ status: 'active', updatedAt: new Date() })
+				.where(eq(borrows.id, id))
+				.returning()
+		).at(0);
+
+		await recordItemActivity(
+			{
+				actorId,
+				actorType: 'user',
+				itemId: borrow!.itemId,
+				activityType: 'borrowed',
+				relatedId: borrow!.id,
+				relatedType: 'borrow',
+				message: 'Received the item'
+			},
+			tx
+		);
+
+		return borrow;
+	});
 };
