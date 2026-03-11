@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ parent, url }) => {
 
 	const page = Math.max(1, Number(url.searchParams.get('page') ?? '1'));
 	const limit = 20;
-	const tagId = url.searchParams.get('tag') ? Number(url.searchParams.get('tag')) : undefined;
+	const tagNames = url.searchParams.getAll('tags').filter(Boolean);
 	const communityId = url.searchParams.get('community')
 		? Number(url.searchParams.get('community'))
 		: undefined;
@@ -24,7 +24,7 @@ export const load: PageServerLoad = async ({ parent, url }) => {
 			userId: user.id,
 			page,
 			limit,
-			tagId,
+			tagNames: tagNames.length > 0 ? tagNames : undefined,
 			communityId,
 			ownerId,
 			search,
@@ -41,6 +41,6 @@ export const load: PageServerLoad = async ({ parent, url }) => {
 		topOwners,
 		topTags,
 		user,
-		filters: { tagId, communityId, ownerId, search, availableToday }
+		filters: { tagNames, communityId, ownerId, search, availableToday }
 	};
 };

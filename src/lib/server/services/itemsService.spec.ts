@@ -32,6 +32,7 @@ vi.mock('$lib/server/db/schema', () => ({
 		userId: 'communityMemberships.userId'
 	},
 	items: { id: 'items.id', name: 'items.name', ownerId: 'items.ownerId' },
+	tags: { id: 'tags.id', name: 'tags.name' },
 	tagsToItems: { itemId: 'tagsToItems.itemId', tagId: 'tagsToItems.tagId' },
 	borrows: { id: 'borrows.id', itemId: 'borrows.itemId', status: 'borrows.status' }
 }));
@@ -54,7 +55,7 @@ vi.mock('drizzle-orm', () => ({
 
 import { db } from '$lib/server/db';
 import { getItemsForUserCommunities } from '$lib/server/services/itemsService';
-import { eq, ilike, notExists } from 'drizzle-orm';
+import { eq, ilike, inArray, notExists } from 'drizzle-orm';
 
 const mockDb = db as {
 	select: ReturnType<typeof vi.fn>;
@@ -216,16 +217,28 @@ describe('getItemsForUserCommunities', () => {
 			expect(ilike).not.toHaveBeenCalled();
 		});
 
-		it('applies tag filter when tagId is provided', async () => {
-			await getItemsForUserCommunities({ userId: 'u1', tagId: 7 });
+		it('applies tag filter by name when tagNames is provided', async () => {
+			await getItemsForUserCommunities({ userId: 'u1', tagNames: ['construction'] });
 
-			expect(eq).toHaveBeenCalledWith('tagsToItems.tagId', 7);
+			expect(inArray).toHaveBeenCalledWith('tags.name', ['construction']);
 		});
 
-		it('does not apply tag filter when tagId is omitted', async () => {
+		it('applies tag filter for multiple tag names', async () => {
+			await getItemsForUserCommunities({ userId: 'u1', tagNames: ['construction', 'tools'] });
+
+			expect(inArray).toHaveBeenCalledWith('tags.name', ['construction', 'tools']);
+		});
+
+		it('does not apply tag filter when tagNames is omitted', async () => {
 			await getItemsForUserCommunities({ userId: 'u1' });
 
-			expect(eq).not.toHaveBeenCalledWith('tagsToItems.tagId', expect.anything());
+			expect(inArray).not.toHaveBeenCalledWith('tags.name', expect.anything());
+		});
+
+		it('does not apply tag filter when tagNames is empty', async () => {
+			await getItemsForUserCommunities({ userId: 'u1', tagNames: [] });
+
+			expect(inArray).not.toHaveBeenCalledWith('tags.name', expect.anything());
 		});
 
 		it('applies community filter when communityId is provided', async () => {

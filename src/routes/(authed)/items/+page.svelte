@@ -18,10 +18,8 @@
 
 	let { data }: { data: PageServerData } = $props();
 
-	const selectedTag = $derived(
-		data.filters.tagId
-			? data.topTags.find((t: { id: number; name: string }) => t.id === data.filters.tagId)
-			: undefined
+	const initialTags = $derived(
+		data.filters.tagNames.map((name: string) => ({ name }))
 	);
 
 	let formEl = $state<HTMLFormElement>();
@@ -54,7 +52,7 @@
 		<Field label="Tags">
 			<TagsCombobox
 				topTags={data.topTags}
-				initialTags={selectedTag ? [{ name: selectedTag.name }] : []}
+				{initialTags}
 				creatable={false}
 				onchange={submitForm}
 			/>

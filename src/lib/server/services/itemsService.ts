@@ -4,6 +4,7 @@ import {
 	communities,
 	communityMemberships,
 	items,
+	tags,
 	tagsToItems,
 	borrows
 } from '$lib/server/db/schema';
@@ -124,7 +125,7 @@ type CommunityItemsParams = {
 	userId: string;
 	page?: number;
 	limit?: number;
-	tagId?: number;
+	tagNames?: string[];
 	communityId?: number;
 	ownerId?: string;
 	search?: string;
@@ -132,17 +133,21 @@ type CommunityItemsParams = {
 };
 
 export const getItemsForUserCommunities = async (params: CommunityItemsParams) => {
-	const { userId, page = 1, limit = 20, tagId, communityId, ownerId, search, availableToday } = params;
+	const { userId, page = 1, limit = 20, tagNames, communityId, ownerId, search, availableToday } = params;
 	const offset = (page - 1) * limit;
 
 	const whereClause = and(
 		inArray(items.id, communityItemIdsForUser(userId, communityId)),
 		ownerId ? eq(items.ownerId, ownerId) : undefined,
 		search?.trim() ? ilike(items.name, `%${search.trim()}%`) : undefined,
-		tagId
+		tagNames?.length
 			? inArray(
 					items.id,
-					db.select({ id: tagsToItems.itemId }).from(tagsToItems).where(eq(tagsToItems.tagId, tagId))
+					db
+						.select({ id: tagsToItems.itemId })
+						.from(tagsToItems)
+						.innerJoin(tags, eq(tagsToItems.tagId, tags.id))
+						.where(inArray(tags.name, tagNames))
 				)
 			: undefined,
 		availableToday
