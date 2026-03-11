@@ -15,8 +15,8 @@ export const tagsInput = defineSlotRecipe({
 			textStyle: 'label'
 		},
 		control: {
-			'--focus-color': 'colors.colorPalette.solid.bg',
-			'--error-color': 'colors.error',
+			'--focus-color': '{colors.colorPalette.solid.bg}',
+			'--error-color': '{colors.error}',
 			'--input-height': 'var(--tags-input-height)',
 
 			minH: 'var(--tags-input-height)',

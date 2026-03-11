@@ -25,13 +25,9 @@ export const combobox = defineSlotRecipe({
 			position: 'relative'
 		},
 		content: {
-			background: 'input.bg',
-			borderRadius: 'l2',
-			boxShadow: 'md',
+			layerStyle: 'overlay',
 			display: 'flex',
 			flexDirection: 'column',
-			maxH: 'min(var(--available-height), {sizes.96})',
-			minWidth: 'max(var(--reference-width), {sizes.40})',
 			outline: '0',
 			overflowY: 'auto',
 			zIndex: 'dropdown',
@@ -54,10 +50,10 @@ export const combobox = defineSlotRecipe({
 			display: 'flex',
 			justifyContent: 'space-between',
 			_hover: {
-				background: 'gray.surface.bg.hover'
+				background: 'bg.subtle'
 			},
 			_highlighted: {
-				background: 'gray.surface.bg.hover'
+				background: 'bg.subtle'
 			},
 			_selected: {},
 			_disabled: {

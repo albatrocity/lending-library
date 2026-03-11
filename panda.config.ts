@@ -1,5 +1,11 @@
 import { defineConfig } from '@pandacss/dev';
+import { animationStyles } from './src/lib/theme/animation-styles';
 import { colors } from './src/lib/theme/colors';
+import { keyframes } from './src/lib/theme/keyframes';
+import { layerStyles } from './src/lib/theme/layer-styles';
+import { textStyles } from './src/lib/theme/text-styles';
+import { globalTokens } from './src/lib/theme/tokens';
+import { zIndex } from './src/lib/theme/z-index';
 import { combobox } from './src/lib/theme/recipes/combobox';
 import { tagsInput } from './src/lib/theme/recipes/tags-input';
 
@@ -9,9 +15,19 @@ export default defineConfig({
 	exclude: [],
 	theme: {
 		extend: {
-			semanticTokens: {
-				colors
+			tokens: {
+				zIndex
 			},
+			semanticTokens: {
+				colors: {
+					...colors,
+					...globalTokens
+				}
+			},
+			keyframes,
+			animationStyles,
+			textStyles,
+			layerStyles,
 			recipes: {
 				combobox,
 				tagsInput
