@@ -59,6 +59,7 @@
 	createItem={(v) => ({ id: -1, name: v })}
 	name="tags"
 	openOnClick
+	placeholder="Add tags"
 	closeOnSelect={false}
 	loading={asyncList().loading}
 	{creatable}

@@ -35,6 +35,9 @@ export default defineConfig({
 		recipes: {
 			input: ['*'],
 			textarea: ['*']
+		},
+		patterns: {
+			stack: [{ properties: { gap: ['*'] } }]
 		}
 	}
 });

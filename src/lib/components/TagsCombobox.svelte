@@ -17,7 +17,7 @@
 	} from '@ark-ui/svelte/combobox';
 	import { Portal } from '@ark-ui/svelte/portal';
 	import { combobox as comboboxRecipe, tagsInput as tagsInputRecipe } from 'styled-system/recipes';
-	import { css } from 'styled-system/css';
+	import { css, cx } from 'styled-system/css';
 	import { SvelteMap } from 'svelte/reactivity';
 
 	type Props = {
@@ -143,9 +143,19 @@
 	const tagsRecipe = tagsInputRecipe();
 </script>
 
-<ComboboxRootProvider value={combobox} onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter') e.preventDefault(); }}>
-	{#if selectedItems.length > 0}
-		<div class={comboRecipe.tagList}>
+<ComboboxRootProvider
+	value={combobox}
+	onkeydown={(e: KeyboardEvent) => {
+		if (e.key === 'Enter') e.preventDefault();
+	}}
+>
+	<ComboboxControl class={cx(comboRecipe.control, css({ flexWrap: 'wrap', p: 1 }))}>
+		<div
+			class={cx(
+				comboRecipe.tagList,
+				css({ display: 'inline-flex', flexWrap: 'wrap', width: '100%' })
+			)}
+		>
 			{#each selectedItems as item (itemToValue(item))}
 				<span class={tagsRecipe.itemPreview}>
 					<span class={tagsRecipe.itemText}>{itemToString(item)}</span>
@@ -158,11 +168,9 @@
 					</button>
 				</span>
 			{/each}
+			<ComboboxInput {placeholder} class={cx(comboRecipe.input, css({ flex: 1 }))} />
 		</div>
-	{/if}
 
-	<ComboboxControl class={comboRecipe.control}>
-		<ComboboxInput {placeholder} class={comboRecipe.input} />
 		<div class={comboRecipe.indicatorGroup}>
 			<ComboboxTrigger class={comboRecipe.trigger}>
 				<svg

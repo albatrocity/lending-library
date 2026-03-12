@@ -16,11 +16,19 @@ export const combobox = defineSlotRecipe({
 			textStyle: 'label'
 		},
 		input: {
-			...input.base,
+			// ...input.base,
 			overflow: 'hidden',
 			textOverflow: 'ellipsis',
 			whiteSpace: 'nowrap',
-			border: 'none'
+			border: 'none',
+			_focus: {
+				outline: 'none',
+				border: 'none'
+			},
+			'&:focus-visible': {
+				outline: 'none',
+				border: 'none'
+			}
 		},
 		control: {
 			position: 'relative',
@@ -121,15 +129,9 @@ export const combobox = defineSlotRecipe({
 		}
 	},
 	defaultVariants: {
-		size: 'md',
-		variant: 'outline'
+		size: 'md'
 	},
 	variants: {
-		variant: {
-			outline: {
-				input: input.variants.variant.outline
-			}
-		},
 		size: {
 			xs: {
 				input: {
@@ -168,7 +170,7 @@ export const combobox = defineSlotRecipe({
 				itemGroup: { gap: '0.5' },
 				itemGroupLabel: { px: '2', height: '10' },
 				empty: { px: '2', minH: '10' },
-				tagList: { gap: '1.5' }
+				tagList: { gap: '1.5', minHeight: '2.2rem' }
 			},
 			lg: {
 				input: {

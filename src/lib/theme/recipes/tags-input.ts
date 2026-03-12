@@ -6,6 +6,7 @@ export const tagsInput = defineSlotRecipe({
 	slots: tagsInputAnatomy.keys(),
 	base: {
 		root: {
+			colorPalette: 'primary',
 			display: 'flex',
 			flexDirection: 'column',
 			gap: '1.5',
@@ -72,6 +73,7 @@ export const tagsInput = defineSlotRecipe({
 			verticalAlign: 'middle'
 		},
 		itemDeleteTrigger: {
+			colorPalette: 'primary',
 			display: 'flex',
 			borderRadius: 'l1',
 			alignItems: 'center',
@@ -82,13 +84,14 @@ export const tagsInput = defineSlotRecipe({
 			}
 		},
 		itemPreview: {
-			height: 'var(--tags-input-item-height)',
-			px: 'var(--tags-input-item-px)',
-
+			colorPalette: 'primary',
+			padding: '0.25rem',
 			alignItems: 'center',
-			borderRadius: 'l1',
+			borderRadius: 'sm',
 			display: 'inline-flex',
-			userSelect: 'none'
+			userSelect: 'none',
+			borderWidth: '1px',
+			borderColor: 'colorPalette.solid.bg'
 		},
 		itemText: {
 			lineClamp: '1'
