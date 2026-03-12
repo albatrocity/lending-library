@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import TagsCombobox from '$lib/components/TagsCombobox.svelte';
+	import TagsInput from '$lib/components/TagsInput.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Field from '$lib/components/Field.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import TextArea from '$lib/components/TextArea.svelte';
+
+	import TagsCombobox from '$lib/components/TagsCombobox.svelte';
 
 	let { form, data } = $props();
 
@@ -22,13 +24,19 @@
 			<TextArea autoresize name="description" placeholder="Description" />
 		</Field>
 
-		<select name="communityIds" multiple>
-			{#each communities as community (community.id)}
-				<option value={community.id}>{community.name}</option>
-			{/each}
-		</select>
+		<Field label="Communities">
+			<TagsCombobox
+				defaultItems={communities}
+				itemToValue={(c) => String(c.id)}
+				itemToString={(c) => c.name}
+				id="communities-combobox"
+				openOnClick
+			/>
+		</Field>
 
-		<TagsCombobox {topTags} />
+		<Field label="Tags">
+			<TagsInput {topTags} />
+		</Field>
 
 		<Button type="submit">Create</Button>
 	</form>

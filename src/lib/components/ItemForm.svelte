@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { Item } from '$lib/schemas/items';
-	import TagsCombobox from './TagsCombobox.svelte';
+	import TagsInput from './TagsInput.svelte';
 	import Button from './Button.svelte';
 	import Field from './Field.svelte';
 	import TextInput from './TextInput.svelte';
@@ -24,7 +24,7 @@
 			<TextInput name="description" placeholder="Description" value={item?.description} />
 		</Field>
 		<Field label="Tags">
-			<TagsCombobox {topTags} initialTags={item?.tags} />
+			<TagsInput {topTags} initialTags={item?.tags} />
 		</Field>
 		<Button type="submit">Save</Button>
 	</form>

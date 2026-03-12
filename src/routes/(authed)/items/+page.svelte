@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageServerData } from './$types';
 	import ItemListItem from '$lib/components/ItemListItem.svelte';
-	import TagsCombobox from '$lib/components/TagsCombobox.svelte';
+	import TagsInput from '$lib/components/TagsInput.svelte';
 	import CommunityCombobox from '$lib/components/CommunityCombobox.svelte';
 	import OwnerCombobox from '$lib/components/OwnerCombobox.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
@@ -62,7 +62,7 @@
 		</Field>
 
 		<Field label="Tags">
-			<TagsCombobox topTags={data.topTags} {initialTags} creatable={false} onchange={submitForm} />
+			<TagsInput topTags={data.topTags} {initialTags} creatable={false} onchange={submitForm} />
 		</Field>
 
 		<Field label="Owner">
