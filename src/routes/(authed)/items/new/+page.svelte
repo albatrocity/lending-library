@@ -4,6 +4,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import Field from '$lib/components/Field.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
+	import TextArea from '$lib/components/TextArea.svelte';
 
 	let { form, data } = $props();
 
@@ -18,7 +19,7 @@
 			<TextInput name="name" placeholder="Name" />
 		</Field>
 		<Field label="Description">
-			<TextInput name="description" placeholder="Description" />
+			<TextArea autoresize name="description" placeholder="Description" />
 		</Field>
 
 		<select name="communityIds" multiple>

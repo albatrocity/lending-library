@@ -33,7 +33,8 @@ export default defineConfig({
 	outdir: 'styled-system',
 	staticCss: {
 		recipes: {
-			input: ['*']
+			input: ['*'],
+			textarea: ['*']
 		}
 	}
 });
