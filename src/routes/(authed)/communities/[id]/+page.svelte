@@ -29,7 +29,7 @@
 		<p>No items in this community yet.</p>
 	{:else}
 		<ul>
-			{#each data.items as item}
+			{#each data.items as item (item.id)}
 				<a href={resolve('/(authed)/items/[id]', { id: String(item.id) })}>
 					<li>
 						<strong>{item.name}</strong>
@@ -60,7 +60,7 @@
 
 	<h2>Members ({data.community.members.length})</h2>
 	<ul>
-		{#each data.community.members as member}
+		{#each data.community.members as member (member.userId)}
 			<li>
 				{member.userName} ({member.userEmail})
 				{#if member.userId === data.community.ownerId}

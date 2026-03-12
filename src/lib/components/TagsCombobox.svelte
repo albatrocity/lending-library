@@ -23,10 +23,6 @@
 	import { Portal } from '@ark-ui/svelte/portal';
 	import { combobox as comboboxRecipe, tagsInput as tagsInputRecipe } from 'styled-system/recipes';
 	import { tick } from 'svelte';
-	import type { HTMLAttributes, SvelteHTMLElements } from 'svelte/elements';
-	type PropsFn<T extends keyof SvelteHTMLElements> = (
-		props?: SvelteHTMLElements[T]
-	) => HTMLAttributes<HTMLElement>;
 
 	type Tag = { id: number; name: string };
 
@@ -74,7 +70,6 @@
 		// (mergeProps overwrites with the later arg). Point the Combobox machine
 		// at that same ID so getControlEl() can find the anchor for positioning.
 		ids: { control: tagsInput().getControlProps().id ?? undefined },
-		allowCustomValue: creatable,
 		selectionBehavior: 'clear',
 		onValueChange: ({ value }) => {
 			const selectedName = value[0];

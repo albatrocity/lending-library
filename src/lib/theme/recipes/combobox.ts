@@ -19,10 +19,17 @@ export const combobox = defineSlotRecipe({
 			...input.base,
 			overflow: 'hidden',
 			textOverflow: 'ellipsis',
-			whiteSpace: 'nowrap'
+			whiteSpace: 'nowrap',
+			border: 'none'
 		},
 		control: {
-			position: 'relative'
+			position: 'relative',
+			display: 'flex',
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: '2',
+			border: '1px solid',
+			borderColor: 'border'
 		},
 		content: {
 			layerStyle: 'overlay',

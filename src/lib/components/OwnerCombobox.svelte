@@ -1,18 +1,5 @@
 <script lang="ts">
-	import {
-		useCombobox,
-		ComboboxRootProvider,
-		ComboboxControl,
-		ComboboxInput,
-		ComboboxTrigger,
-		ComboboxClearTrigger,
-		ComboboxPositioner,
-		ComboboxContent,
-		ComboboxItem,
-		ComboboxItemText,
-		createListCollection
-	} from '@ark-ui/svelte/combobox';
-	import { Portal } from '@ark-ui/svelte/portal';
+	import Combobox from './Combobox.svelte';
 	import { tick } from 'svelte';
 
 	type Owner = { id: string; name: string; email: string };
@@ -25,34 +12,9 @@
 
 	let searchResults = $state<Owner[] | null>(null);
 	let inputValue = $state('');
+	let selectedValue = $state(selectedOwnerId ?? '');
 
 	const ownerItems = $derived(searchResults ?? topOwners);
-
-	const collection = $derived(
-		createListCollection({
-			items: ownerItems,
-			itemToValue: (item: Owner) => item.id,
-			itemToString: (item: Owner) => item.name
-		})
-	);
-
-	const initialValue = $derived(selectedOwnerId ? [selectedOwnerId] : []);
-
-	const combobox = useCombobox(() => ({
-		id: 'owner-filter',
-		collection,
-		defaultValue: initialValue,
-		onInputValueChange: ({ inputValue: v }: { inputValue: string }) => {
-			inputValue = v;
-		},
-		onValueChange: async () => {
-			await tick();
-			onchange?.();
-		},
-		openOnClick: true
-	}));
-
-	const selectedValue = $derived(combobox().value[0] ?? '');
 
 	$effect(() => {
 		const q = inputValue;
@@ -68,26 +30,24 @@
 	});
 </script>
 
-<ComboboxRootProvider value={combobox}>
-	<ComboboxControl>
-		<ComboboxInput placeholder="Filter by owner..." />
-		<ComboboxTrigger>▼</ComboboxTrigger>
-		{#if selectedValue}
-			<ComboboxClearTrigger>✕</ComboboxClearTrigger>
-		{/if}
-	</ComboboxControl>
-
-	<Portal>
-		<ComboboxPositioner>
-			<ComboboxContent>
-				{#each ownerItems as item (item.id)}
-					<ComboboxItem {item}>
-						<ComboboxItemText>{item.name} ({item.email})</ComboboxItemText>
-					</ComboboxItem>
-				{/each}
-			</ComboboxContent>
-		</ComboboxPositioner>
-	</Portal>
+<Combobox
+	items={ownerItems}
+	itemToValue={(o) => o.id}
+	itemToString={(o) => o.name}
+	itemKey={(o) => o.id}
+	placeholder="Filter by owner..."
+	id="owner-filter"
+	defaultValue={selectedOwnerId ? [selectedOwnerId] : []}
+	oninputvaluechange={(v) => (inputValue = v)}
+	onvaluechange={async (v) => {
+		selectedValue = v;
+		await tick();
+		onchange?.();
+	}}
+>
+	{#snippet row(item)}
+		{item.name} ({item.email})
+	{/snippet}
 
 	<input type="hidden" name="owner" value={selectedValue} />
-</ComboboxRootProvider>
+</Combobox>
