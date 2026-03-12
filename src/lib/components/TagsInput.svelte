@@ -38,9 +38,16 @@
 		})
 	);
 
+	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+	$effect(() => () => clearTimeout(debounceTimer));
+
 	function handleInputValueChange(details: { inputValue: string; reason?: string }) {
 		if (details.reason === 'input-change') {
-			asyncList().setFilterText(details.inputValue);
+			clearTimeout(debounceTimer);
+			debounceTimer = setTimeout(() => {
+				asyncList().setFilterText(details.inputValue);
+			}, 300);
 		}
 	}
 

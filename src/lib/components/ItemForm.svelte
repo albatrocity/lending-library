@@ -59,8 +59,8 @@
 					itemToValue={(c) => String(c.id)}
 					itemToString={(c) => c.name}
 					openOnClick
-					closeOnSelect={false}
 					placeholder="Add communities"
+					emptyMessage="No communities found"
 					oninputvaluechange={(d) => {
 						if (d.reason === 'input-change') communityList.filter(d.inputValue);
 					}}

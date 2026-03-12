@@ -120,6 +120,9 @@
 				.map((v) => details.items.find((i) => itemToValue(i) === v) ?? createdItemCache.get(v))
 				.filter((i): i is T => i != null);
 			onvaluechange?.(details);
+			if (closeOnSelect) {
+				combobox().setInputValue('');
+			}
 		}
 	}));
 
@@ -144,18 +147,19 @@
 </script>
 
 <ComboboxRootProvider
+	immediate
 	value={combobox}
 	onkeydown={(e: KeyboardEvent) => {
 		if (e.key === 'Enter') e.preventDefault();
 	}}
 >
-	<ComboboxControl class={cx(comboRecipe.control, css({ flexWrap: 'wrap', p: 1 }))}>
-		<div
-			class={cx(
-				comboRecipe.tagList,
-				css({ display: 'inline-flex', flexWrap: 'wrap', width: '100%' })
-			)}
-		>
+	<div
+		class={cx(
+			comboRecipe.control,
+			css({ display: 'inline-flex', flexWrap: 'wrap', width: '100%' })
+		)}
+	>
+		<div class={comboRecipe.tagList}>
 			{#each selectedItems as item (itemToValue(item))}
 				<span class={tagsRecipe.itemPreview}>
 					<span class={tagsRecipe.itemText}>{itemToString(item)}</span>
@@ -168,27 +172,28 @@
 					</button>
 				</span>
 			{/each}
-			<ComboboxInput {placeholder} class={cx(comboRecipe.input, css({ flex: 1 }))} />
+			<ComboboxControl class={css({ flex: 1 })}>
+				<ComboboxInput {placeholder} class={cx(comboRecipe.input, css({ flex: 1 }))} />
+				<div class={comboRecipe.indicatorGroup}>
+					<ComboboxTrigger class={comboRecipe.trigger}>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" />
+						</svg>
+					</ComboboxTrigger>
+				</div>
+			</ComboboxControl>
 		</div>
-
-		<div class={comboRecipe.indicatorGroup}>
-			<ComboboxTrigger class={comboRecipe.trigger}>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="16"
-					height="16"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				>
-					<path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" />
-				</svg>
-			</ComboboxTrigger>
-		</div>
-	</ComboboxControl>
+	</div>
 
 	<Portal>
 		<ComboboxPositioner>

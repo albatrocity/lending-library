@@ -16,7 +16,7 @@ export const combobox = defineSlotRecipe({
 			textStyle: 'label'
 		},
 		input: {
-			// ...input.base,
+			...input.base,
 			overflow: 'hidden',
 			textOverflow: 'ellipsis',
 			whiteSpace: 'nowrap',
@@ -37,7 +37,8 @@ export const combobox = defineSlotRecipe({
 			alignItems: 'center',
 			gap: '2',
 			border: '1px solid',
-			borderColor: 'border'
+			borderColor: 'border',
+			padding: '1'
 		},
 		content: {
 			layerStyle: 'overlay',
@@ -46,6 +47,7 @@ export const combobox = defineSlotRecipe({
 			outline: '0',
 			overflowY: 'auto',
 			zIndex: 'dropdown',
+			maxWidth: 'fit-content',
 			_open: {
 				animationStyle: 'slide-fade-in',
 				animationDuration: 'slow'
@@ -125,7 +127,8 @@ export const combobox = defineSlotRecipe({
 		tagList: {
 			display: 'flex',
 			flexWrap: 'wrap',
-			gap: '1.5'
+			gap: '1.5',
+			width: '100%'
 		}
 	},
 	defaultVariants: {
