@@ -2,6 +2,8 @@
 	import { enhance } from '$app/forms';
 	import TagsCombobox from '$lib/components/TagsCombobox.svelte';
 	import Button from '$lib/components/Button.svelte';
+	import Field from '$lib/components/Field.svelte';
+	import TextInput from '$lib/components/TextInput.svelte';
 
 	let { form, data } = $props();
 
@@ -12,8 +14,12 @@
 <div>
 	<h1>New Item</h1>
 	<form method="post" action="?/createItem" use:enhance>
-		<input type="text" name="name" placeholder="Name" />
-		<input type="text" name="description" placeholder="Description" />
+		<Field label="Name">
+			<TextInput name="name" placeholder="Name" />
+		</Field>
+		<Field label="Description">
+			<TextInput name="description" placeholder="Description" />
+		</Field>
 
 		<select name="communityIds" multiple>
 			{#each communities as community (community.id)}

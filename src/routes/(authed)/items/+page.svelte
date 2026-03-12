@@ -12,15 +12,14 @@
 		CheckboxLabel,
 		CheckboxHiddenInput
 	} from '@ark-ui/svelte/checkbox';
-	import { FieldInput } from '@ark-ui/svelte/field';
+
 	import Field from '$lib/components/Field.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
+	import TextInput from '$lib/components/TextInput.svelte';
 
 	let { data }: { data: PageServerData } = $props();
 
-	const initialTags = $derived(
-		data.filters.tagNames.map((name: string) => ({ name }))
-	);
+	const initialTags = $derived(data.filters.tagNames.map((name: string) => ({ name })));
 
 	let formEl = $state<HTMLFormElement>();
 	let searchDebounceTimer: ReturnType<typeof setTimeout>;
@@ -35,10 +34,23 @@
 	}
 </script>
 
-<form method="get" action="" bind:this={formEl} onchange={submitForm} data-sveltekit-keepfocus data-sveltekit-noscroll>
+<form
+	method="get"
+	action=""
+	bind:this={formEl}
+	onchange={submitForm}
+	data-sveltekit-keepfocus
+	data-sveltekit-noscroll
+>
 	<Fieldset legend="Filters">
 		<Field label="Search">
-			<FieldInput name="q" value={data.filters.search ?? ''} placeholder="Search by title..." oninput={onSearchInput} onchange={null} />
+			<TextInput
+				name="q"
+				value={data.filters.search ?? ''}
+				placeholder="Search by title..."
+				oninput={onSearchInput}
+				onchange={null}
+			/>
 		</Field>
 
 		<Field label="Community">
@@ -50,12 +62,7 @@
 		</Field>
 
 		<Field label="Tags">
-			<TagsCombobox
-				topTags={data.topTags}
-				{initialTags}
-				creatable={false}
-				onchange={submitForm}
-			/>
+			<TagsCombobox topTags={data.topTags} {initialTags} creatable={false} onchange={submitForm} />
 		</Field>
 
 		<Field label="Owner">
@@ -67,11 +74,7 @@
 		</Field>
 
 		<div>
-			<CheckboxRoot
-				name="available"
-				value="1"
-				defaultChecked={data.filters.availableToday}
-			>
+			<CheckboxRoot name="available" value="1" defaultChecked={data.filters.availableToday}>
 				<CheckboxControl>
 					<CheckboxIndicator>✓</CheckboxIndicator>
 				</CheckboxControl>

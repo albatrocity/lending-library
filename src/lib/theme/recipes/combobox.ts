@@ -1,6 +1,6 @@
 import { comboboxAnatomy } from '@ark-ui/svelte/anatomy';
 import { defineSlotRecipe } from '@pandacss/dev';
-import { input } from './inupt';
+import { input } from './input';
 
 export const combobox = defineSlotRecipe({
 	className: 'combobox',

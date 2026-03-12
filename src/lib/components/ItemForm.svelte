@@ -3,6 +3,8 @@
 	import type { Item } from '$lib/schemas/items';
 	import TagsCombobox from './TagsCombobox.svelte';
 	import Button from './Button.svelte';
+	import Field from './Field.svelte';
+	import TextInput from './TextInput.svelte';
 
 	type Tag = { id: number; name: string };
 
@@ -15,9 +17,15 @@
 
 <div>
 	<form method="post" {action} use:enhance>
-		<input type="text" name="name" placeholder="Name" value={item?.name} />
-		<input type="text" name="description" placeholder="Description" value={item?.description} />
-		<TagsCombobox {topTags} initialTags={item?.tags} />
+		<Field label="Name">
+			<TextInput name="name" placeholder="Name" value={item?.name} />
+		</Field>
+		<Field label="Description">
+			<TextInput name="description" placeholder="Description" value={item?.description} />
+		</Field>
+		<Field label="Tags">
+			<TagsCombobox {topTags} initialTags={item?.tags} />
+		</Field>
 		<Button type="submit">Save</Button>
 	</form>
 </div>
