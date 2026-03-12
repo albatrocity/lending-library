@@ -1,150 +1,130 @@
-<script lang="ts" generics="T">
+<script lang="ts" generics="T extends import('@ark-ui/svelte/combobox').CollectionItem">
 	import type { Snippet } from 'svelte';
-	import {
-		useTagsInput,
-		TagsInputRootProvider,
-		TagsInputControl,
-		TagsInputItem,
-		TagsInputItemPreview,
-		TagsInputItemText,
-		TagsInputItemDeleteTrigger,
-		TagsInputInput
-	} from '@ark-ui/svelte/tags-input';
+	import type { ListCollection } from '@ark-ui/svelte/combobox';
+	import type { InputValueChangeDetails, ValueChangeDetails } from '@zag-js/combobox';
+	import { untrack } from 'svelte';
 	import {
 		useCombobox,
 		ComboboxRootProvider,
 		ComboboxControl,
+		ComboboxEmpty,
 		ComboboxInput,
 		ComboboxPositioner,
 		ComboboxContent,
 		ComboboxItem,
 		ComboboxItemText,
-		createListCollection
+		ComboboxTrigger
 	} from '@ark-ui/svelte/combobox';
 	import { Portal } from '@ark-ui/svelte/portal';
 	import { combobox as comboboxRecipe, tagsInput as tagsInputRecipe } from 'styled-system/recipes';
-	import { tick, untrack } from 'svelte';
+	import { css } from 'styled-system/css';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	type Props = {
-		defaultItems: T[];
+		id?: string;
+		collection: ListCollection<T>;
 		itemToValue: (item: T) => string;
 		itemToString: (item: T) => string;
-		id: string;
 		defaultValue?: string[];
 		creatable?: boolean;
 		/** Required when creatable is true — constructs a synthetic T for the "create" option */
 		createItem?: (value: string) => T;
+		inputBehavior?: 'none' | 'autohighlight' | 'autocomplete';
+		loading?: boolean;
 		placeholder?: string;
 		/** Name attribute for hidden form inputs. If omitted, no hidden inputs are rendered. */
 		name?: string;
-		onchange?: () => void;
-		row?: Snippet<[T]>;
 		openOnClick?: boolean;
 		closeOnSelect?: boolean;
-
-		// Provide at most one of these for search behaviour:
-		/** Async search called with a 300 ms debounce when the input changes */
-		search?: (query: string) => Promise<T[]>;
-		/** Finite list filtered client-side when the input changes */
-		items?: T[];
-		/** Custom filter predicate used with `items` (default: case-insensitive itemToString.includes) */
-		filterFn?: (item: T, query: string) => boolean;
+		row?: Snippet<[T]>;
+		emptyMessage?: string;
+		oninputvaluechange?: (details: InputValueChangeDetails) => void;
+		onvaluechange?: (details: ValueChangeDetails<T>) => void;
 	};
 
+	const uid = $props.id();
+
 	let {
-		defaultItems,
+		id = uid,
+		collection,
 		itemToValue,
 		itemToString,
 		defaultValue = [],
-		creatable = true,
+		creatable = false,
 		createItem,
+		inputBehavior = 'none',
+		loading = false,
 		placeholder = 'Add tags...',
 		name,
-		id,
 		openOnClick = false,
 		closeOnSelect = true,
-		onchange,
 		row,
-		search,
-		items,
-		filterFn
+		emptyMessage,
+		oninputvaluechange,
+		onvaluechange
 	}: Props = $props();
 
-	let asyncResults = $state<T[] | null>(null);
 	let inputValue = $state('');
 
-	// Resolve a stored form value back to its display label using defaultItems.
-	// Falls back to the value itself when the item isn't found (e.g. label === value).
-	function valueToLabel(value: string): string {
-		const item = defaultItems.find((i) => itemToValue(i) === value);
-		return item ? itemToString(item) : value;
-	}
+	// Created items aren't in the collection so Zag can't resolve them back from
+	// value → item. Keep a local cache so we can populate selectedItems ourselves.
+	const createdItemCache = new SvelteMap<string, T>();
 
-	// Maps display label → form value so TagsInput can show labels while
-	// hidden inputs emit the correct underlying values.
-	let labelToValue = $state<Record<string, string>>(
-		untrack(() => Object.fromEntries(defaultValue.map((v) => [valueToLabel(v), v])))
+	// Zag does not fire onValueChange for defaultValue, so we resolve the initial
+	// selected items ourselves. defaultValue items may be absent from collection
+	// (e.g. TagsInput filters them out), so fall back to createItem when needed.
+	let selectedItems: T[] = $state(
+		untrack(() =>
+			defaultValue
+				.map((v) => {
+					const found = collection.items.find((i) => itemToValue(i) === v);
+					if (found) return found;
+					if (createItem) {
+						const created = createItem(v);
+						createdItemCache.set(v, created);
+						return created;
+					}
+					return null;
+				})
+				.filter((i): i is T => i != null)
+		)
 	);
 
-	// Synchronous client-side filter — computed reactively, no side-effects
-	const syncResults = $derived.by(() => {
-		if (!items || !inputValue.trim()) return null;
-		const q = inputValue;
-		const fn =
-			filterFn ??
-			((item: T, query: string) => itemToString(item).toLowerCase().includes(query.toLowerCase()));
-		return items.filter((item) => fn(item, q));
-	});
-
-	const visibleItems = $derived(asyncResults ?? syncResults ?? defaultItems);
-
-	const tagsInput = useTagsInput(() => ({
-		id,
-		// TagsInput stores and displays labels; values are tracked separately in labelToValue.
-		defaultValue: defaultValue.map(valueToLabel),
-		onInputValueChange: ({ inputValue: v }) => {
-			inputValue = v;
-		},
-		onValueChange: async () => {
-			await tick();
-			onchange?.();
-		}
-	}));
-
-	const collection = $derived(
-		createListCollection({
-			items: visibleItems,
-			itemToValue,
-			itemToString
-		})
-	);
-
-	const combobox = useCombobox(() => ({
+	const combobox = useCombobox<T>(() => ({
 		id,
 		collection,
-		// The actual control and input elements belong to the TagsInput machine —
-		// tell the Combobox machine where to find them so positioning and openOnClick work.
-		ids: {
-			control: tagsInput().getControlProps().id ?? undefined,
-			input: tagsInput().getInputProps().id ?? undefined
-		},
+		multiple: true,
+		selectionBehavior: 'clear',
+		inputBehavior,
 		openOnClick,
 		closeOnSelect,
-		selectionBehavior: 'clear',
-		onValueChange: ({ value }) => {
-			const selectedValue = value[0];
-			if (selectedValue) {
-				const item = visibleItems.find((i) => itemToValue(i) === selectedValue);
-				const label = item ? itemToString(item) : selectedValue;
-				labelToValue[label] = selectedValue;
-				tagsInput().addValue(label);
-				tagsInput().clearInputValue();
+		defaultValue,
+		allowCustomValue: creatable,
+		onInputValueChange(details) {
+			inputValue = details.inputValue;
+			oninputvaluechange?.(details);
+		},
+		onValueChange(details) {
+			if (creatable && createItem) {
+				const resolvedValues = new Set(details.items.map((i) => itemToValue(i)));
+				for (const v of details.value) {
+					if (!resolvedValues.has(v) && !createdItemCache.has(v)) {
+						createdItemCache.set(v, createItem(v));
+					}
+				}
+				for (const v of createdItemCache.keys()) {
+					if (!details.value.includes(v)) createdItemCache.delete(v);
+				}
 			}
+			selectedItems = details.value
+				.map((v) => details.items.find((i) => itemToValue(i) === v) ?? createdItemCache.get(v))
+				.filter((i): i is T => i != null);
+			onvaluechange?.(details);
 		}
 	}));
 
 	const hasExactMatch = $derived(
-		visibleItems.some(
+		collection.items.some(
 			(item) => itemToString(item).toLowerCase() === inputValue.trim().toLowerCase()
 		)
 	);
@@ -155,51 +135,65 @@
 
 	const createOptionItem = $derived(createItem ? createItem(inputValue.trim()) : null);
 
+	function removeTag(value: string) {
+		combobox().clearValue(value);
+	}
+
 	const comboRecipe = comboboxRecipe();
 	const tagsRecipe = tagsInputRecipe();
-
-	// Async search with debounce — must use $effect since it involves a timer and async fetch
-	$effect(() => {
-		const q = inputValue;
-		if (!q.trim() || !search) {
-			asyncResults = null;
-			return;
-		}
-		const timer = setTimeout(async () => {
-			asyncResults = await search(q);
-		}, 300);
-		return () => clearTimeout(timer);
-	});
 </script>
 
-<TagsInputRootProvider value={tagsInput}>
-	<ComboboxRootProvider value={combobox}>
-		<TagsInputControl class={tagsRecipe.control}>
-			{#snippet asChild(tagsInputControlProps)}
-				<ComboboxControl {...tagsInputControlProps()} class={comboRecipe.control}>
-					{#each tagsInput().value as tag, index (tag)}
-						<TagsInputItem {index} value={tag} class={tagsRecipe.item}>
-							<TagsInputItemPreview class={tagsRecipe.itemPreview}>
-								<TagsInputItemText class={tagsRecipe.itemText}>{tag}</TagsInputItemText>
-								<TagsInputItemDeleteTrigger class={tagsRecipe.itemDeleteTrigger}
-									>×</TagsInputItemDeleteTrigger
-								>
-							</TagsInputItemPreview>
-						</TagsInputItem>
-					{/each}
-					<TagsInputInput {placeholder} class={tagsRecipe.input}>
-						{#snippet asChild(tagsInputProps)}
-							<ComboboxInput {...tagsInputProps()} class={comboRecipe.input} />
-						{/snippet}
-					</TagsInputInput>
-				</ComboboxControl>
-			{/snippet}
-		</TagsInputControl>
+<ComboboxRootProvider value={combobox} onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter') e.preventDefault(); }}>
+	{#if selectedItems.length > 0}
+		<div class={comboRecipe.tagList}>
+			{#each selectedItems as item (itemToValue(item))}
+				<span class={tagsRecipe.itemPreview}>
+					<span class={tagsRecipe.itemText}>{itemToString(item)}</span>
+					<button
+						type="button"
+						class={tagsRecipe.itemDeleteTrigger}
+						onclick={() => removeTag(itemToValue(item))}
+					>
+						&times;
+					</button>
+				</span>
+			{/each}
+		</div>
+	{/if}
 
-		<Portal>
-			<ComboboxPositioner>
-				<ComboboxContent class={comboRecipe.content}>
-					{#each visibleItems as item (itemToValue(item))}
+	<ComboboxControl class={comboRecipe.control}>
+		<ComboboxInput {placeholder} class={comboRecipe.input} />
+		<div class={comboRecipe.indicatorGroup}>
+			<ComboboxTrigger class={comboRecipe.trigger}>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="16"
+					height="16"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" />
+				</svg>
+			</ComboboxTrigger>
+		</div>
+	</ComboboxControl>
+
+	<Portal>
+		<ComboboxPositioner>
+			<ComboboxContent class={comboRecipe.content}>
+				{#if emptyMessage}
+					<ComboboxEmpty class={comboRecipe.empty}>{emptyMessage}</ComboboxEmpty>
+				{/if}
+				{#if loading}
+					<div class={css({ layerStyle: 'disabled', textStyle: 'sm', px: '2', py: '2' })}>
+						Searching…
+					</div>
+				{:else}
+					{#each collection.items as item (itemToValue(item))}
 						<ComboboxItem {item} class={comboRecipe.item}>
 							<ComboboxItemText>
 								{#if row}
@@ -215,14 +209,14 @@
 							<ComboboxItemText>+ Create "{inputValue.trim()}"</ComboboxItemText>
 						</ComboboxItem>
 					{/if}
-				</ComboboxContent>
-			</ComboboxPositioner>
-		</Portal>
+				{/if}
+			</ComboboxContent>
+		</ComboboxPositioner>
+	</Portal>
 
-		{#if name}
-			{#each tagsInput().value as label (label)}
-				<input type="hidden" {name} value={labelToValue[label] ?? label} />
-			{/each}
-		{/if}
-	</ComboboxRootProvider>
-</TagsInputRootProvider>
+	{#if name}
+		{#each combobox().value as value (value)}
+			<input type="hidden" {name} {value} />
+		{/each}
+	{/if}
+</ComboboxRootProvider>

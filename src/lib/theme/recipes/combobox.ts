@@ -4,7 +4,7 @@ import { input } from './input';
 
 export const combobox = defineSlotRecipe({
 	className: 'combobox',
-	slots: comboboxAnatomy.extendWith('indicatorGroup').keys(),
+	slots: comboboxAnatomy.extendWith('indicatorGroup', 'tagList').keys(),
 	base: {
 		root: {
 			display: 'flex',
@@ -48,6 +48,7 @@ export const combobox = defineSlotRecipe({
 			},
 			'&[data-empty]:not(:has([data-scope=combobox][data-part=empty]))': {
 				opacity: 0
+				// display: 'none'
 			}
 		},
 		item: {
@@ -62,7 +63,10 @@ export const combobox = defineSlotRecipe({
 			_highlighted: {
 				background: 'bg.subtle'
 			},
-			_selected: {},
+			_selected: {
+				background: 'bg.subtle',
+				color: 'primary.plain.fg'
+			},
 			_disabled: {
 				layerStyle: 'disabled'
 			}
@@ -109,6 +113,11 @@ export const combobox = defineSlotRecipe({
 			display: 'flex',
 			alignItems: 'center',
 			color: 'fg.subtle'
+		},
+		tagList: {
+			display: 'flex',
+			flexWrap: 'wrap',
+			gap: '1.5'
 		}
 	},
 	defaultVariants: {
@@ -119,12 +128,6 @@ export const combobox = defineSlotRecipe({
 		variant: {
 			outline: {
 				input: input.variants.variant.outline
-			},
-			surface: {
-				input: input.variants.variant.surface
-			},
-			subtle: {
-				input: input.variants.variant.subtle
 			}
 		},
 		size: {
@@ -138,7 +141,8 @@ export const combobox = defineSlotRecipe({
 				itemGroup: { gap: '0.5' },
 				itemGroupLabel: { px: '1', height: '8' },
 				indicatorGroup: { px: '2', _icon: { boxSize: '3.5' } },
-				empty: { px: '1', minH: '8' }
+				empty: { px: '1', minH: '8' },
+				tagList: { gap: '1' }
 			},
 			sm: {
 				input: {
@@ -150,7 +154,8 @@ export const combobox = defineSlotRecipe({
 				itemGroup: { gap: '0.5' },
 				itemGroupLabel: { px: '1.5', height: '9' },
 				indicatorGroup: { px: '2.5', _icon: { boxSize: '4' } },
-				empty: { px: '1.5', minH: '9' }
+				empty: { px: '1.5', minH: '9' },
+				tagList: { gap: '1' }
 			},
 			md: {
 				input: {
@@ -162,7 +167,8 @@ export const combobox = defineSlotRecipe({
 				item: { px: '2', minH: '10', gap: '2', _icon: { boxSize: '4' } },
 				itemGroup: { gap: '0.5' },
 				itemGroupLabel: { px: '2', height: '10' },
-				empty: { px: '2', minH: '10' }
+				empty: { px: '2', minH: '10' },
+				tagList: { gap: '1.5' }
 			},
 			lg: {
 				input: {
@@ -174,7 +180,8 @@ export const combobox = defineSlotRecipe({
 				itemGroup: { gap: '0.5' },
 				itemGroupLabel: { px: '2.5', height: '11' },
 				indicatorGroup: { px: '3.5', _icon: { boxSize: '4.5' } },
-				empty: { px: '2.5', minH: '11' }
+				empty: { px: '2.5', minH: '11' },
+				tagList: { gap: '1.5' }
 			},
 			xl: {
 				input: {
@@ -186,7 +193,8 @@ export const combobox = defineSlotRecipe({
 				itemGroup: { gap: '1' },
 				itemGroupLabel: { px: '3', height: '12' },
 				indicatorGroup: { px: '4', _icon: { boxSize: '5' } },
-				empty: { px: '3', minH: '12' }
+				empty: { px: '3', minH: '12' },
+				tagList: { gap: '2' }
 			}
 		}
 	}

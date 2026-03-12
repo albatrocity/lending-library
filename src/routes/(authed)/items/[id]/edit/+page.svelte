@@ -1,10 +1,15 @@
 <script lang="ts">
 	import ItemForm from '$lib/components/ItemForm.svelte';
 
-	let { data } = $props();
-	const item = $derived(data.item);
-	const topTags = $derived(data.topTags);
+	let { form, data } = $props();
 </script>
 
 <h1>Edit Item</h1>
-<ItemForm action="/items/{item.id}/edit" {item} {topTags} />
+<ItemForm
+	action="/items/{data.item.id}/edit"
+	{form}
+	item={data.item}
+	topTags={data.topTags}
+	allCommunities={data.communities}
+	itemCommunities={data.itemCommunities}
+/>
