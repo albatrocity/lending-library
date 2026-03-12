@@ -14,6 +14,7 @@
 		ComboboxContent,
 		ComboboxItem,
 		ComboboxItemText,
+		ComboboxItemIndicator,
 		ComboboxTrigger
 	} from '@ark-ui/svelte/combobox';
 	import { Portal } from '@ark-ui/svelte/portal';
@@ -228,6 +229,7 @@
 									{itemToString(item)}
 								{/if}
 							</ComboboxItemText>
+							<ComboboxItemIndicator class={comboRecipe.itemIndicator}>✔</ComboboxItemIndicator>
 						</ComboboxItem>
 					{/each}
 					{#if showCreateOption && createOptionItem}

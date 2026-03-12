@@ -73,10 +73,7 @@ export const combobox = defineSlotRecipe({
 			_highlighted: {
 				background: 'bg.subtle'
 			},
-			_selected: {
-				background: 'bg.subtle',
-				color: 'primary.plain.fg'
-			},
+			_selected: {},
 			_disabled: {
 				layerStyle: 'disabled'
 			}
