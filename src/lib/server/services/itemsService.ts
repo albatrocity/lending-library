@@ -6,7 +6,8 @@ import {
 	items,
 	tags,
 	tagsToItems,
-	borrows
+	borrows,
+	images
 } from '$lib/server/db/schema';
 import {
 	createItemSchema,
@@ -16,6 +17,23 @@ import {
 
 import type { z } from 'zod';
 import { and, eq, inArray, ilike, notExists, count as drizzleCount, asc } from 'drizzle-orm';
+
+async function getImagesForItems(itemIds: number[]) {
+	if (itemIds.length === 0) return new Map<number, typeof images.$inferSelect[]>();
+
+	const allImages = await db
+		.select()
+		.from(images)
+		.where(and(eq(images.imageableType, 'items'), inArray(images.imageableId, itemIds)));
+
+	const imagesByItemId = new Map<number, typeof images.$inferSelect[]>();
+	for (const image of allImages) {
+		const existing = imagesByItemId.get(image.imageableId) || [];
+		existing.push(image);
+		imagesByItemId.set(image.imageableId, existing);
+	}
+	return imagesByItemId;
+}
 
 export const getAllItems = async () => {
 	const results = await db.query.items.findMany({
@@ -32,10 +50,18 @@ export const getAllItemsByOwnerId = async (ownerId: string) => {
 		with: { tagsToItems: { with: { tag: true } } },
 		where: (t, { eq }) => eq(t.ownerId, ownerId)
 	});
-	return results.map(({ tagsToItems, ...rest }) => ({
-		...rest,
-		tags: tagsToItems.map((t) => t.tag)
-	}));
+
+	const itemIds = results.map((item) => item.id);
+	const imagesByItemId = await getImagesForItems(itemIds);
+
+	return results.map(({ tagsToItems, ...rest }) => {
+		const itemImages = imagesByItemId.get(rest.id) || [];
+		return {
+			...rest,
+			tags: tagsToItems.map((t) => t.tag),
+			thumbnailUrl: itemImages[0]?.url || null
+		};
+	});
 };
 
 export const createItem = async (payload: z.infer<typeof createItemSchema>) => {
@@ -81,8 +107,14 @@ export const getItem = async (id: number) => {
 		with: { tagsToItems: { with: { tag: true } } }
 	});
 	if (!result) return undefined;
+
+	const imagesByItemId = await getImagesForItems([id]);
 	const { tagsToItems, ...rest } = result;
-	return { ...rest, tags: tagsToItems.map((t) => t.tag) };
+	return {
+		...rest,
+		tags: tagsToItems.map((t) => t.tag),
+		images: imagesByItemId.get(id) || []
+	};
 };
 
 export const updateItem = async (id: number, payload: z.infer<typeof updateItemSchema>) => {
@@ -174,13 +206,20 @@ export const getItemsForUserCommunities = async (params: CommunityItemsParams) =
 		})
 	]);
 
+	const itemIds = itemResults.map((item) => item.id);
+	const imagesByItemId = await getImagesForItems(itemIds);
+
 	return {
-		items: itemResults.map(({ tagsToItems, lender, ...rest }) => ({
-			...rest,
-			tags: tagsToItems.map((t) => t.tag),
-			ownerName: lender.name,
-			ownerEmail: lender.email
-		})),
+		items: itemResults.map(({ tagsToItems, lender, ...rest }) => {
+			const itemImages = imagesByItemId.get(rest.id) || [];
+			return {
+				...rest,
+				tags: tagsToItems.map((t) => t.tag),
+				ownerName: lender.name,
+				ownerEmail: lender.email,
+				thumbnailUrl: itemImages[0]?.url || null
+			};
+		}),
 		total: countResult[0]?.total ?? 0,
 		page,
 		limit

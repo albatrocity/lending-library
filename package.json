@@ -52,6 +52,7 @@
 	},
 	"dependencies": {
 		"@ark-ui/svelte": "^5.19.1",
+		"@aws-sdk/client-s3": "^3.1007.0",
 		"@pandacss/studio": "^1.9.0",
 		"pg": "^8.18.0",
 		"postgres": "^3.4.8"

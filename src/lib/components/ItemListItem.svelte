@@ -9,6 +9,7 @@
 		currentUserId: string;
 		tags?: Tag[];
 		ownerName?: string;
+		thumbnailUrl?: string | null;
 	};
 
 	let {
@@ -18,11 +19,15 @@
 		currentUserId,
 		ownerId,
 		tags = [],
-		ownerName
+		ownerName,
+		thumbnailUrl
 	}: ItemListItemProps = $props();
 </script>
 
 <div>
+	{#if thumbnailUrl}
+		<img src={thumbnailUrl} alt={name} />
+	{/if}
 	<span><a href={resolve('/(authed)/items/[id]', { id: String(id) })}>{name} - {id}</a></span>
 	{#if ownerName}
 		<small>by {ownerName}</small>

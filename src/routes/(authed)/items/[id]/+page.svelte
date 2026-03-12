@@ -5,7 +5,16 @@
 
 	let { data, form } = $props();
 	const item = $derived(data.item);
+	const images = $derived(item.images ?? []);
 </script>
+
+{#if images.length > 0}
+	<div>
+		{#each images as image (image.id)}
+			<img src={image.url} alt={item.name} />
+		{/each}
+	</div>
+{/if}
 
 <h1>{item.name}</h1>
 {@html item.description}
