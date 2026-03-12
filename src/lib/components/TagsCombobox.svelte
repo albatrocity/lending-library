@@ -5,6 +5,7 @@
 	import { untrack } from 'svelte';
 	import {
 		useCombobox,
+		createListCollection,
 		ComboboxRootProvider,
 		ComboboxControl,
 		ComboboxEmpty,
@@ -90,9 +91,33 @@
 		)
 	);
 
+	const hasExactMatch = $derived(
+		collection.items.some(
+			(item) => itemToString(item).toLowerCase() === inputValue.trim().toLowerCase()
+		)
+	);
+
+	const showCreateOption = $derived(
+		creatable && !!createItem && inputValue.trim().length > 0 && !hasExactMatch
+	);
+
+	const createOptionItem = $derived(createItem ? createItem(inputValue.trim()) : null);
+
+	// Include the create option in the collection so Zag's keyboard navigation
+	// can reach it. The ComboboxItem in the template renders the special label.
+	const effectiveCollection = $derived(
+		showCreateOption && createOptionItem
+			? createListCollection({
+					items: [...collection.items, createOptionItem],
+					itemToValue,
+					itemToString
+				})
+			: collection
+	);
+
 	const combobox = useCombobox<T>(() => ({
 		id,
-		collection,
+		collection: effectiveCollection,
 		multiple: true,
 		selectionBehavior: 'clear',
 		inputBehavior,
@@ -125,18 +150,6 @@
 			}
 		}
 	}));
-
-	const hasExactMatch = $derived(
-		collection.items.some(
-			(item) => itemToString(item).toLowerCase() === inputValue.trim().toLowerCase()
-		)
-	);
-
-	const showCreateOption = $derived(
-		creatable && !!createItem && inputValue.trim().length > 0 && !hasExactMatch
-	);
-
-	const createOptionItem = $derived(createItem ? createItem(inputValue.trim()) : null);
 
 	function removeTag(value: string) {
 		combobox().clearValue(value);
