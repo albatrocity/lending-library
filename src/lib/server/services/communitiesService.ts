@@ -4,6 +4,7 @@ import {
 	communityMemberships,
 	communityItems,
 	items,
+	images,
 	user
 } from '$lib/server/db/schema';
 import type { CreateCommunity } from '$lib/schemas/communities';
@@ -134,7 +135,7 @@ export const addItemToCommunity = async (communityId: number, itemId: number) =>
 };
 
 export const getCommunityItems = async (communityId: number) => {
-	return await db
+	const itemResults = await db
 		.select({
 			id: items.id,
 			name: items.name,
@@ -146,6 +147,26 @@ export const getCommunityItems = async (communityId: number) => {
 		.innerJoin(items, eq(communityItems.itemId, items.id))
 		.innerJoin(user, eq(items.ownerId, user.id))
 		.where(eq(communityItems.communityId, communityId));
+
+	const itemIds = itemResults.map((item) => item.id);
+	if (itemIds.length === 0) return itemResults.map((item) => ({ ...item, thumbnailUrl: null }));
+
+	const allImages = await db
+		.select()
+		.from(images)
+		.where(and(eq(images.imageableType, 'items'), inArray(images.imageableId, itemIds)));
+
+	const imagesByItemId = new Map<number, string>();
+	for (const image of allImages) {
+		if (!imagesByItemId.has(image.imageableId)) {
+			imagesByItemId.set(image.imageableId, image.url);
+		}
+	}
+
+	return itemResults.map((item) => ({
+		...item,
+		thumbnailUrl: imagesByItemId.get(item.id) || null
+	}));
 };
 
 export const getOwnerItemsNotInCommunity = async (ownerId: string, communityId: number) => {

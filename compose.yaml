@@ -10,5 +10,14 @@ services:
       POSTGRES_DB: local
     volumes:
       - pgdata:/var/lib/postgresql
+
+  s3mock:
+    image: adobe/s3mock
+    restart: always
+    ports:
+      - "9090:9090"
+    environment:
+      - COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS=lending-library
+
 volumes:
   pgdata:

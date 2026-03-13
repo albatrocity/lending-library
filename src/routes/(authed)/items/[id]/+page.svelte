@@ -1,11 +1,21 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
+	import Image from '$lib/components/Image.svelte';
 	import { resolve } from '$app/paths';
 
 	let { data, form } = $props();
 	const item = $derived(data.item);
+	const images = $derived(item.images ?? []);
 </script>
+
+{#if images.length > 0}
+	<div>
+		{#each images as image (image.id)}
+			<Image src={image.url} alt={item.name} size="sm" />
+		{/each}
+	</div>
+{/if}
 
 <h1>{item.name}</h1>
 {@html item.description}

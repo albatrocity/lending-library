@@ -4,11 +4,13 @@
 	import { resolve } from '$app/paths';
 	import type { Tag } from '$lib/schemas/tags';
 	import Button from '$lib/components/Button.svelte';
+	import Image from './Image.svelte';
 
 	type ItemListItemProps = Item & {
 		currentUserId: string;
 		tags?: Tag[];
 		ownerName?: string;
+		thumbnailUrl?: string | null;
 	};
 
 	let {
@@ -18,11 +20,15 @@
 		currentUserId,
 		ownerId,
 		tags = [],
-		ownerName
+		ownerName,
+		thumbnailUrl
 	}: ItemListItemProps = $props();
 </script>
 
 <div>
+	{#if thumbnailUrl}
+		<Image src={thumbnailUrl} alt={name} size="sm" />
+	{/if}
 	<span><a href={resolve('/(authed)/items/[id]', { id: String(id) })}>{name} - {id}</a></span>
 	{#if ownerName}
 		<small>by {ownerName}</small>
