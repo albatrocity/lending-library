@@ -4,9 +4,50 @@
 		FieldLabel,
 		FieldErrorText,
 		FieldHelperText,
-		type FieldRootBaseProps
+		type FieldRootBaseProps,
+		fieldAnatomy
 	} from '@ark-ui/svelte/field';
 	import type { Snippet } from 'svelte';
+	import { sva } from 'styled-system/css';
+
+	const recipe = sva({
+		slots: fieldAnatomy.keys(),
+		base: {
+			root: {
+				display: 'flex',
+				flexDirection: 'column',
+				gap: '1.5'
+			},
+			label: {
+				alignItems: 'center',
+				color: 'fg.default',
+				display: 'flex',
+				gap: '0.5',
+				textAlign: 'start',
+				userSelect: 'none',
+				textStyle: 'label',
+				_disabled: {
+					layerStyle: 'disabled'
+				}
+			},
+			requiredIndicator: {
+				color: 'colorPalette.solid'
+			},
+			helperText: {
+				color: 'fg.muted',
+				textStyle: 'sm',
+				_disabled: {
+					layerStyle: 'disabled'
+				}
+			},
+			errorText: {
+				color: 'error',
+				textStyle: 'sm'
+			}
+		}
+	});
+
+	const field = recipe();
 
 	let {
 		label,
@@ -25,13 +66,13 @@
 	} = $props();
 </script>
 
-<FieldRoot {invalid} {disabled} {required} {readOnly}>
-	<FieldLabel>{label}</FieldLabel>
+<FieldRoot {invalid} {disabled} {required} {readOnly} class={field.root}>
+	<FieldLabel class={field.label}>{label}</FieldLabel>
 	{@render children()}
 	{#if helperText}
-		<FieldHelperText>{helperText}</FieldHelperText>
+		<FieldHelperText class={field.helperText}>{helperText}</FieldHelperText>
 	{/if}
 	{#if errorText}
-		<FieldErrorText>{errorText}</FieldErrorText>
+		<FieldErrorText class={field.errorText}>{errorText}</FieldErrorText>
 	{/if}
 </FieldRoot>

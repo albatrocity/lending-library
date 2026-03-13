@@ -1,45 +1,68 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { page } from 'vitest/browser';
+import { createListCollection } from '@ark-ui/svelte/combobox';
 import TagsCombobox from './TagsCombobox.svelte';
 
-// The debounced $effect calls fetch when inputValue is non-empty.
-// For render-only tests inputValue stays empty so no fetch is triggered,
-// but we stub it globally so any accidental call won't hit a real network.
-beforeEach(() => {
-	vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: vi.fn().mockResolvedValue([]) }));
-});
+type Tag = { id: number; name: string };
 
-const topTags = [
+const itemToValue = (t: Tag) => t.name;
+const itemToString = (t: Tag) => t.name;
+
+const defaultItems: Tag[] = [
 	{ id: 1, name: 'svelte' },
 	{ id: 2, name: 'typescript' },
 	{ id: 3, name: 'drizzle' }
 ];
 
+function makeCollection() {
+	return createListCollection<Tag>({ items: defaultItems, itemToValue, itemToString });
+}
+
 describe('TagsCombobox', () => {
-	it('renders the tags input field', async () => {
-		render(TagsCombobox, { props: { topTags } });
+	it('renders the combobox input field', async () => {
+		render(TagsCombobox, {
+			props: { collection: makeCollection(), itemToValue, itemToString, name: 'tags' }
+		});
 		const input = page.getByPlaceholder('Add tags...');
 		await expect.element(input).toBeInTheDocument();
 	});
 
-	it('renders with no tag pills when initialTags is omitted', async () => {
-		const { container } = render(TagsCombobox, { props: { topTags } });
-		const pills = container.querySelectorAll('[data-part="item-preview"]');
+	it('renders with no tag pills when defaultValue is omitted', async () => {
+		const { container } = render(TagsCombobox, {
+			props: { collection: makeCollection(), itemToValue, itemToString, name: 'tags' }
+		});
+		const pills = container.querySelectorAll(
+			'[data-scope="combobox"] button[type="button"]:not([data-part="trigger"])'
+		);
 		expect(pills.length).toBe(0);
 	});
 
-	it('renders tag pills for each item in initialTags', async () => {
-		const initialTags = [{ name: 'svelte' }, { name: 'typescript' }];
-		render(TagsCombobox, { props: { topTags, initialTags } });
+	it('renders tag pills for each item in defaultValue', async () => {
+		render(TagsCombobox, {
+			props: {
+				collection: makeCollection(),
+				itemToValue,
+				itemToString,
+				name: 'tags',
+				defaultValue: ['svelte', 'typescript']
+			}
+		});
 
 		await expect.element(page.getByText('svelte')).toBeInTheDocument();
 		await expect.element(page.getByText('typescript')).toBeInTheDocument();
 	});
 
-	it('renders a hidden input for each initial tag', async () => {
-		const initialTags = [{ name: 'svelte' }, { name: 'typescript' }];
-		const { container } = render(TagsCombobox, { props: { topTags, initialTags } });
+	it('renders a hidden input for each value in defaultValue', async () => {
+		const { container } = render(TagsCombobox, {
+			props: {
+				collection: makeCollection(),
+				itemToValue,
+				itemToString,
+				name: 'tags',
+				defaultValue: ['svelte', 'typescript']
+			}
+		});
 
 		const hiddenInputs = container.querySelectorAll('input[type="hidden"][name="tags"]');
 		expect(hiddenInputs.length).toBe(2);
@@ -49,16 +72,41 @@ describe('TagsCombobox', () => {
 		expect(values).toContain('typescript');
 	});
 
-	it('renders no hidden inputs when initialTags is empty', async () => {
-		const { container } = render(TagsCombobox, { props: { topTags, initialTags: [] } });
+	it('renders no hidden inputs when defaultValue is empty', async () => {
+		const { container } = render(TagsCombobox, {
+			props: {
+				collection: makeCollection(),
+				itemToValue,
+				itemToString,
+				name: 'tags',
+				defaultValue: []
+			}
+		});
 		const hiddenInputs = container.querySelectorAll('input[type="hidden"][name="tags"]');
 		expect(hiddenInputs.length).toBe(0);
 	});
 
-	it('renders a delete trigger for each initial tag', async () => {
-		const initialTags = [{ name: 'svelte' }];
-		const { container } = render(TagsCombobox, { props: { topTags, initialTags } });
-		const deleteTriggers = container.querySelectorAll('[data-part="item-delete-trigger"]');
-		expect(deleteTriggers.length).toBe(1);
+	it('renders no hidden inputs when name prop is omitted', async () => {
+		const { container } = render(TagsCombobox, {
+			props: { collection: makeCollection(), itemToValue, itemToString, defaultValue: ['svelte'] }
+		});
+		const hiddenInputs = container.querySelectorAll('input[type="hidden"]');
+		expect(hiddenInputs.length).toBe(0);
+	});
+
+	it('renders a delete button for each selected tag', async () => {
+		const { container } = render(TagsCombobox, {
+			props: {
+				collection: makeCollection(),
+				itemToValue,
+				itemToString,
+				name: 'tags',
+				defaultValue: ['svelte']
+			}
+		});
+		const deleteButtons = container.querySelectorAll(
+			'[data-scope="combobox"] button[type="button"]'
+		);
+		expect(deleteButtons.length).toBe(1);
 	});
 });

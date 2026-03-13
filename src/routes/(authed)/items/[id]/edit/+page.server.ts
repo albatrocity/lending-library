@@ -1,5 +1,6 @@
-import { getItem, updateItem } from '$lib/server/services/itemsService';
+import { getItem, getItemCommunities, updateItem } from '$lib/server/services/itemsService';
 import { searchTags, setItemTags } from '$lib/server/services/tagsService';
+import { getUserCommunities } from '$lib/server/services/communitiesService';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../[id]/edit/$types';
 import { updateItemSchema } from '$lib/schemas/items';
@@ -7,9 +8,10 @@ import { updateItemSchema } from '$lib/schemas/items';
 export const load: PageServerLoad = async ({ params, parent }) => {
 	const { user } = await parent();
 
-	const [item, topTags] = await Promise.all([
+	const [item, topTags, communities] = await Promise.all([
 		getItem(Number(params.id)),
-		searchTags(undefined, 10)
+		searchTags(undefined, 10),
+		getUserCommunities(user.id)
 	]);
 
 	if (!item) {
@@ -20,7 +22,9 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 		return error(403, 'You are not the owner of this item');
 	}
 
-	return { item, topTags };
+	const itemCommunities = await getItemCommunities(item.id);
+
+	return { item, topTags, communities, itemCommunities };
 };
 
 export const actions: Actions = {
