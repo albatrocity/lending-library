@@ -2,12 +2,13 @@
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
 	import { resolve } from '$app/paths';
+	import Image from '$lib/components/Image.svelte';
 
 	let { data, form } = $props();
 </script>
 
 <div>
-	<a href="/communities">Back to Communities</a>
+	<a href={resolve('/(authed)/communities')}>Back to Communities</a>
 
 	<h1>{data.community.name}</h1>
 
@@ -18,9 +19,9 @@
 	{#if data.isOwner}
 		<p>You are the owner of this community.</p>
 		<div>
-			<a href="/communities/{data.community.id}/invite">Invite Members</a>
-			<a href="/communities/{data.community.id}/items/add">Add Existing Items</a>
-			<a href="/communities/{data.community.id}/items/new">Create New Item</a>
+			<a href={resolve('/(authed)/communities/[id]/invite', { id: String(data.community.id) })}>Invite Members</a>
+			<a href={resolve('/(authed)/communities/[id]/items/add', { id: String(data.community.id) })}>Add Existing Items</a>
+			<a href={resolve('/(authed)/communities/[id]/items/new', { id: String(data.community.id) })}>Create New Item</a>
 		</div>
 	{/if}
 
@@ -32,6 +33,9 @@
 			{#each data.items as item (item.id)}
 				<a href={resolve('/(authed)/items/[id]', { id: String(item.id) })}>
 					<li>
+						{#if item.thumbnailUrl}
+							<Image src={item.thumbnailUrl} alt={item.name} size="sm" />
+						{/if}
 						<strong>{item.name}</strong>
 						{#if item.description}
 							- {item.description}

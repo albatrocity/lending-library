@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Button from './Button.svelte';
+	import Image from './Image.svelte';
 
-	type Image = {
+	type ImageData = {
 		id: number;
 		url: string;
 	};
@@ -12,17 +13,19 @@
 		onImagesChange
 	}: {
 		itemId?: number;
-		images?: Image[];
-		onImagesChange?: (images: Image[]) => void;
+		images?: ImageData[];
+		onImagesChange?: (images: ImageData[]) => void;
 	} = $props();
 
-	let currentImages = $state<Image[]>([]);
+	let currentImages = $state<ImageData[]>([]);
 	let pendingFiles = $state<File[]>([]);
 	let uploading = $state(false);
 	let error = $state<string | null>(null);
 
 	$effect(() => {
-		currentImages = [...images];
+		if ( currentImages !== images ) {
+			currentImages = [...images];
+		}
 	});
 
 	function handleFileSelect(event: Event) {
@@ -58,7 +61,7 @@
 		error = null;
 
 		try {
-			const uploaded: Image[] = [];
+			const uploaded: ImageData[] = [];
 			for (const file of pendingFiles) {
 				const formData = new FormData();
 				formData.append('file', file);
@@ -119,7 +122,7 @@
 	<div>
 		{#each currentImages as image (image.id)}
 			<div>
-				<img src={image.url} alt="Uploaded item" />
+				<Image src={image.url} alt="Uploaded item" size="sm" />
 				<button type="button" onclick={() => deleteImage(image.id)}>
 					&times;
 				</button>
@@ -128,7 +131,7 @@
 
 		{#each pendingFiles as file, index (index)}
 			<div>
-				<img src={getPreviewUrl(file)} alt="Pending upload preview" />
+				<Image src={getPreviewUrl(file)} alt="Pending upload preview" size="sm" />
 				<button type="button" onclick={() => removePendingFile(index)}>
 					&times;
 				</button>

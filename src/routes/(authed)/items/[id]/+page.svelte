@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
+	import Image from '$lib/components/Image.svelte';
 	import { resolve } from '$app/paths';
 
 	let { data, form } = $props();
@@ -11,7 +12,7 @@
 {#if images.length > 0}
 	<div>
 		{#each images as image (image.id)}
-			<img src={image.url} alt={item.name} />
+			<Image src={image.url} alt={item.name} size="sm" />
 		{/each}
 	</div>
 {/if}
