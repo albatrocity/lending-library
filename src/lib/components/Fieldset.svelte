@@ -6,6 +6,7 @@
 		FieldsetHelperText,
 		type FieldsetRootBaseProps
 	} from '@ark-ui/svelte/fieldset';
+	import { stack } from 'styled-system/patterns';
 	import type { Snippet } from 'svelte';
 
 	let {
@@ -23,7 +24,7 @@
 	} = $props();
 </script>
 
-<FieldsetRoot {invalid} {disabled}>
+<FieldsetRoot class={stack({ gap: '4' })} {invalid} {disabled}>
 	<FieldsetLegend>{legend}</FieldsetLegend>
 	{#if helperText}
 		<FieldsetHelperText>{helperText}</FieldsetHelperText>

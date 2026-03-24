@@ -32,7 +32,9 @@ export default defineConfig({
 	},
 	outdir: 'styled-system',
 	staticCss: {
+		css: [{ properties: { colorPalette: ['primary', 'danger'] } }],
 		recipes: {
+			button: ['*'],
 			input: ['*'],
 			textarea: ['*']
 		},

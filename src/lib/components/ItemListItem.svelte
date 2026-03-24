@@ -4,6 +4,10 @@
 	import { resolve } from '$app/paths';
 	import type { Tag } from '$lib/schemas/tags';
 	import Button from '$lib/components/Button.svelte';
+	import ButtonLink from '$lib/components/ButtonLink.svelte';
+	import TagComponent from './Tag.svelte';
+
+	import Card from './Card.svelte';
 
 	type ItemListItemProps = Item & {
 		currentUserId: string;
@@ -22,30 +26,48 @@
 	}: ItemListItemProps = $props();
 </script>
 
-<div>
-	<span><a href={resolve('/(authed)/items/[id]', { id: String(id) })}>{name} - {id}</a></span>
-	{#if ownerName}
-		<small>by {ownerName}</small>
-	{/if}
-	{@html description}
-	<ul>
-		{#each tags as tag (tag.id)}
-			<li>{tag.name}</li>
-		{/each}
-	</ul>
-	{#if currentUserId === ownerId}
-		<a href={resolve('/(authed)/items/[id]/edit', { id: String(id) })}>Edit</a>
-		<form
-			method="post"
-			action={resolve('/(authed)/items/[id]/delete', { id: String(id) })}
-			use:enhance
-		>
-			<input type="hidden" name="id" value={id} />
-			<Button type="submit" variant="outline">Delete</Button>
-		</form>
-	{/if}
+<Card>
+	{#snippet header()}
+		<a href={resolve('/(authed)/items/[id]', { id: String(id) })}>{name} - {id}</a>
+	{/snippet}
 
-	{#if currentUserId !== ownerId}
-		<a href={resolve('/(authed)/items/[id]/borrow', { id: String(id) })}>Borrow</a>
-	{/if}
-</div>
+	{#snippet subheader()}
+		{#if ownerName}
+			<small>by {ownerName}</small>
+		{/if}
+	{/snippet}
+
+	{@html description}
+
+	{#snippet footer()}
+		<ul>
+			{#each tags as tag (tag.id)}
+				<li><TagComponent label={tag.name} /></li>
+			{/each}
+		</ul>
+	{/snippet}
+
+	{#snippet actions()}
+		{#if currentUserId === ownerId}
+			<ButtonLink
+				size="xs"
+				variant="ghost"
+				href={resolve('/(authed)/items/[id]/edit', { id: String(id) })}>Edit</ButtonLink
+			>
+			<form
+				method="post"
+				action={resolve('/(authed)/items/[id]/delete', { id: String(id) })}
+				use:enhance
+			>
+				<input type="hidden" name="id" value={id} />
+				<Button size="xs" type="submit" variant="ghost" colorPalette="danger">Delete</Button>
+			</form>
+		{/if}
+
+		{#if currentUserId !== ownerId}
+			<ButtonLink size="xs" href={resolve('/(authed)/items/[id]/borrow', { id: String(id) })}
+				>Borrow</ButtonLink
+			>
+		{/if}
+	{/snippet}
+</Card>

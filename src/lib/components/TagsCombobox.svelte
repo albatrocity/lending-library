@@ -18,9 +18,10 @@
 		ComboboxTrigger
 	} from '@ark-ui/svelte/combobox';
 	import { Portal } from '@ark-ui/svelte/portal';
-	import { combobox as comboboxRecipe, tagsInput as tagsInputRecipe } from 'styled-system/recipes';
+	import { combobox as comboboxRecipe } from 'styled-system/recipes';
 	import { css, cx } from 'styled-system/css';
 	import { SvelteMap } from 'svelte/reactivity';
+	import Tag from './Tag.svelte';
 
 	type Props = {
 		id?: string;
@@ -157,7 +158,6 @@
 	}
 
 	const comboRecipe = comboboxRecipe();
-	const tagsRecipe = tagsInputRecipe();
 </script>
 
 <ComboboxRootProvider
@@ -175,16 +175,7 @@
 	>
 		<div class={comboRecipe.tagList}>
 			{#each selectedItems as item (itemToValue(item))}
-				<span class={tagsRecipe.itemPreview}>
-					<span class={tagsRecipe.itemText}>{itemToString(item)}</span>
-					<button
-						type="button"
-						class={tagsRecipe.itemDeleteTrigger}
-						onclick={() => removeTag(itemToValue(item))}
-					>
-						&times;
-					</button>
-				</span>
+				<Tag label={itemToString(item)} onRemove={() => removeTag(itemToValue(item))} />
 			{/each}
 			<ComboboxControl class={css({ flex: 1 })}>
 				<ComboboxInput {placeholder} class={cx(comboRecipe.input, css({ flex: 1 }))} />
