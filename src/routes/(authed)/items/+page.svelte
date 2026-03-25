@@ -5,13 +5,6 @@
 	import CommunityCombobox from '$lib/components/CommunityCombobox.svelte';
 	import OwnerCombobox from '$lib/components/OwnerCombobox.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
-	import {
-		CheckboxRoot,
-		CheckboxControl,
-		CheckboxIndicator,
-		CheckboxLabel,
-		CheckboxHiddenInput
-	} from '@ark-ui/svelte/checkbox';
 
 	import Field from '$lib/components/Field.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
@@ -22,6 +15,7 @@
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import ButtonLink from '$lib/components/ButtonLink.svelte';
 	import { resolve } from '$app/paths';
+	import SwitchInput from '$lib/components/SwitchInput.svelte';
 
 	let { data }: { data: PageServerData } = $props();
 
@@ -88,13 +82,12 @@
 				</Field>
 
 				<div>
-					<CheckboxRoot name="available" value="1" defaultChecked={data.filters.availableToday}>
-						<CheckboxControl>
-							<CheckboxIndicator>✓</CheckboxIndicator>
-						</CheckboxControl>
-						<CheckboxLabel>Available today</CheckboxLabel>
-						<CheckboxHiddenInput />
-					</CheckboxRoot>
+					<SwitchInput
+						name="available"
+						value="1"
+						defaultChecked={data.filters.availableToday}
+						label="Available today"
+					/>
 				</div>
 
 				<noscript><button type="submit">Apply Filters</button></noscript>

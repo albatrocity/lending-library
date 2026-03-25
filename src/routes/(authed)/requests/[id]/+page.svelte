@@ -2,6 +2,8 @@
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
 	import PageContent from '$lib/components/PageContent.svelte';
+	import PageHeader from '$lib/components/PageHeader.svelte';
+	import { hstack } from 'styled-system/patterns';
 
 	let { data, form } = $props();
 	const request = $derived(data.borrowRequest);
@@ -47,6 +49,8 @@
 			</p>
 		{/if}
 	{:else}
+		<PageHeader title={request.item!.name} />
+
 		<p>
 			{request.user!.name} wants to borrow {request.item!.name} starting {request.startDate}
 			{#if request.endDate}and ending {request.endDate}{/if}.
@@ -55,34 +59,36 @@
 			{@html request.description}
 		</blockquote>
 
-		{#if request.status === 'pending'}
-			<form method="post" action="?/accept" use:enhance>
-				<Button type="submit">Accept</Button>
-			</form>
-			<form method="post" action="?/reject" use:enhance>
-				<Button type="submit">Reject</Button>
-			</form>
-		{:else if request.status === 'accepted'}
-			<p>Accepted at {request.updatedAt.toLocaleString()}.</p>
-			{#if borrow?.status === 'active' || form?.delivered}
-				<p>Item delivered.</p>
-			{:else}
-				<form
-					method="post"
-					action="?/markReceived"
-					use:enhance={({ cancel }) => {
-						if (!confirm('Confirm that you have delivered this item?')) {
-							cancel();
-						}
-					}}
-				>
-					<Button type="submit">Mark as delivered</Button>
+		<div class={hstack({ gap: '2' })}>
+			{#if request.status === 'pending'}
+				<form method="post" action="?/accept" use:enhance>
+					<Button type="submit">Accept</Button>
 				</form>
+				<form method="post" action="?/reject" use:enhance>
+					<Button colorPalette="danger" variant="outline" type="submit">Reject</Button>
+				</form>
+			{:else if request.status === 'accepted'}
+				<p>Accepted at {request.updatedAt.toLocaleString()}.</p>
+				{#if borrow?.status === 'active' || form?.delivered}
+					<p>Item delivered.</p>
+				{:else}
+					<form
+						method="post"
+						action="?/markReceived"
+						use:enhance={({ cancel }) => {
+							if (!confirm('Confirm that you have delivered this item?')) {
+								cancel();
+							}
+						}}
+					>
+						<Button type="submit">Mark as delivered</Button>
+					</form>
+				{/if}
+			{:else}
+				<p>
+					Request {request.status === 'rejected' ? 'rejected' : 'cancelled'} at {request.updatedAt.toLocaleString()}.
+				</p>
 			{/if}
-		{:else}
-			<p>
-				Request {request.status === 'rejected' ? 'rejected' : 'cancelled'} at {request.updatedAt.toLocaleString()}.
-			</p>
-		{/if}
+		</div>
 	{/if}
 </PageContent>
