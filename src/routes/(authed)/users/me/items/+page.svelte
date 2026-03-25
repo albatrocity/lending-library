@@ -7,6 +7,6 @@
 
 <div>
 	{#each data.items as item}
-		<ItemListItem {...item} currentUserId={data.user.id} />
+		<ItemListItem {...item} />
 	{/each}
 </div>

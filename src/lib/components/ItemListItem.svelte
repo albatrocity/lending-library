@@ -4,22 +4,17 @@
 	import { resolve } from '$app/paths';
 	import type { Tag } from '$lib/schemas/tags';
 	import Button from '$lib/components/Button.svelte';
+	import { getUserContext } from '$lib/contexts/user.svelte';
 
 	type ItemListItemProps = Item & {
-		currentUserId: string;
 		tags?: Tag[];
 		ownerName?: string;
 	};
 
-	let {
-		id,
-		name,
-		description,
-		currentUserId,
-		ownerId,
-		tags = [],
-		ownerName
-	}: ItemListItemProps = $props();
+	let { id, name, description, ownerId, tags = [], ownerName }: ItemListItemProps = $props();
+
+	const getUser = getUserContext();
+	const currentUserId = $derived(getUser().id);
 </script>
 
 <div>
