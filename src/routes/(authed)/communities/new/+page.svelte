@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
+	import Field from '$lib/components/Field.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import PageContent from '$lib/components/PageContent.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
@@ -15,9 +16,13 @@
 
 	<form method="post" use:enhance>
 		<Fieldset legend="Community Details">
-			<TextInput name="name" placeholder="Name" required />
+			<Field label="Name">
+				<TextInput name="name" placeholder="Name" required />
+			</Field>
 
-			<TextArea name="description" placeholder="Description" />
+			<Field label="Description">
+				<TextArea name="description" placeholder="Description" />
+			</Field>
 
 			<Button type="submit">Create Community</Button>
 		</Fieldset>

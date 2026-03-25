@@ -11,7 +11,7 @@
 	const { children, sidebar }: Props = $props();
 
 	const recipe = sva({
-		slots: ['root', 'navigation', 'secondaryNavigation', 'sidebar', 'main', 'content'],
+		slots: ['root', 'sidebar', 'main', 'content'],
 		base: {
 			root: {
 				display: 'flex',
@@ -29,6 +29,11 @@
 			},
 			main: {
 				flex: 1
+			},
+			content: {
+				display: 'flex',
+				flexDirection: 'column',
+				gap: '2'
 			}
 		}
 	});
@@ -46,7 +51,9 @@
 
 		<main class={classes.main}>
 			<Container size="2xl">
-				{@render children()}
+				<div class={classes.content}>
+					{@render children()}
+				</div>
 			</Container>
 		</main>
 	</div>

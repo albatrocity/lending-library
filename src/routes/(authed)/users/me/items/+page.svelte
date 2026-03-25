@@ -5,6 +5,7 @@
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import ButtonLink from '$lib/components/ButtonLink.svelte';
 	import { resolve } from '$app/paths';
+	import Collection from '$lib/components/Collection.svelte';
 
 	let { data }: { data: PageServerData } = $props();
 </script>
@@ -16,7 +17,9 @@
 		{/snippet}
 	</PageHeader>
 
-	{#each data.items as item (item.id)}
-		<ItemListItem {...item} currentUserId={data.user.id} />
-	{/each}
+	<Collection>
+		{#each data.items as item (item.id)}
+			<ItemListItem {...item} currentUserId={data.user.id} />
+		{/each}
+	</Collection>
 </PageContent>
