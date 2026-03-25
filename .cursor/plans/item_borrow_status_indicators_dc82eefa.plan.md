@@ -40,6 +40,7 @@ isProject: false
 - An "active" borrow means the item is currently lent out.
 - The availability filter in `getItemsForUserCommunities` already checks for active borrows, but **does not return borrow info per item**.
 - None of the three target views currently display borrow status.
+- The authenticated user is available via Svelte context (`getUserContext` from `$lib/contexts/user.svelte`) throughout the `(authed)` layout subtree (see ADR 0006). Components no longer need a `currentUserId` prop.
 
 ## Data Layer
 
@@ -109,6 +110,7 @@ A small component that accepts `variant` and `children`/`label` props, applying 
 ### 8. Update `ItemListItem.svelte` ([src/lib/components/ItemListItem.svelte](src/lib/components/ItemListItem.svelte))
 
 - Add optional `activeBorrowerId: string | null` to the props.
+- The current user ID is already available via `getUserContext()` (ADR 0006) — no new prop needed for the comparison.
 - In the `header` snippet (next to the item name), render a `Badge`:
   - If `activeBorrowerId === currentUserId`: badge with variant `borrowed`, label "Borrowing".
   - Else if `activeBorrowerId` is truthy: badge with variant `unavailable`, label "Unavailable".
@@ -116,11 +118,11 @@ A small component that accepts `variant` and `children`/`label` props, applying 
 
 ### 9. Update item detail page ([src/routes/(authed)/items/[id]/+page.svelte](src/routes/(authed)/items/[id]/+page.svelte))
 
-Add a `Badge` in the header area (next to the item title or in the subheader) using the same logic as `ItemListItem`.
+Add a `Badge` in the header area (next to the item title or in the subheader). Use `getUserContext()` from `$lib/contexts/user.svelte` to compare the active borrower against the current user, applying the same borrowed/unavailable logic as `ItemListItem`.
 
 ### 10. Update community items add page ([src/routes/(authed)/communities/[id]/items/add/+page.svelte](src/routes/(authed)/communities/[id]/items/add/+page.svelte))
 
-Next to each item name in the checkbox list, show a "Lent out" badge if `activeBorrowerId` is present. Since this page only shows the current user's own items, the borrower is always someone else.
+Next to each item name in the checkbox list, show a "Lent out" badge if `activeBorrowerId` is present. Since this page only shows the current user's own items, the borrower is always someone else — no user context comparison needed here.
 
 ## Data Flow
 
