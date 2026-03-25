@@ -1,8 +1,13 @@
 <script lang="ts">
-	let { children, data } = $props();
+	import type { LayoutData } from './$types';
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
 	import Button from '$lib/components/Button.svelte';
+	import { setUserContext } from '$lib/contexts/user.svelte';
+
+	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props();
+
+	setUserContext(() => data.user);
 </script>
 
 <div>
