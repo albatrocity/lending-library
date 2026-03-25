@@ -15,7 +15,7 @@
 		base: {
 			width: 'full',
 			mx: 'auto',
-			px: { base: '4', md: '6', lg: '8' }
+			px: '4'
 		},
 		defaultVariants: {
 			size: 'lg'

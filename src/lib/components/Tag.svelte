@@ -1,9 +1,17 @@
 <script lang="ts">
 	import { tagsInput } from 'styled-system/recipes';
 
-	const tagsRecipe = tagsInput();
+	const {
+		label,
+		onRemove,
+		size = 'sm'
+	}: { label: string; onRemove?: () => void; size?: 'sm' | 'md' | 'lg' } = $props();
 
-	let { label, onRemove }: { label: string; onRemove?: () => void } = $props();
+	const tagsRecipe = $derived(
+		tagsInput({
+			size
+		})
+	);
 </script>
 
 <span class={tagsRecipe.itemPreview}>

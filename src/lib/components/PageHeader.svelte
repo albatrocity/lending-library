@@ -20,7 +20,7 @@
 	})}
 >
 	<div>
-		<h1 class={css({ textStyle: 'xl' })}>{title}</h1>
+		<h1 class={css({ textStyle: 'xl', lineHeight: 'loose' })}>{title}</h1>
 		{#if subheader}
 			{@render subheader()}
 		{/if}

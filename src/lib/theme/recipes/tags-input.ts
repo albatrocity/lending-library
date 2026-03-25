@@ -200,7 +200,7 @@ export const tagsInput = defineSlotRecipe({
 					textStyle: 'sm'
 				},
 				control: { gap: '1' },
-				itemPreview: { gap: '1' },
+				itemPreview: { gap: '1', textStyle: 'sm', height: 'auto' },
 				itemDeleteTrigger: { boxSize: '4.5', me: '-0.5' }
 			},
 			md: {
@@ -213,7 +213,7 @@ export const tagsInput = defineSlotRecipe({
 					textStyle: 'sm'
 				},
 				control: { gap: '1.5' },
-				itemPreview: { gap: '1' },
+				itemPreview: { gap: '1', textStyle: 'md' },
 				itemDeleteTrigger: { boxSize: '5', me: '-1' }
 			},
 			lg: {
@@ -226,7 +226,7 @@ export const tagsInput = defineSlotRecipe({
 					textStyle: 'md'
 				},
 				control: { gap: '1.5' },
-				itemPreview: { gap: '1' },
+				itemPreview: { gap: '1', textStyle: 'md' },
 				itemDeleteTrigger: { boxSize: '6', me: '-1.5' }
 			}
 		}

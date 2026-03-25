@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import Button from '$lib/components/Button.svelte';
+	import Collection from '$lib/components/Collection.svelte';
+	import ItemListItem from '$lib/components/ItemListItem.svelte';
 	import { resolve } from '$app/paths';
+	import PageContent from '$lib/components/PageContent.svelte';
+	import PageHeader from '$lib/components/PageHeader.svelte';
 
 	let { data, form } = $props();
 </script>
 
-<div>
-	<a href="/communities">Back to Communities</a>
+<PageContent>
+	<PageHeader title={data.community.name} />
+	<a href={resolve('/(authed)/communities')}>Back to Communities</a>
 
 	<h1>{data.community.name}</h1>
 
@@ -18,9 +21,15 @@
 	{#if data.isOwner}
 		<p>You are the owner of this community.</p>
 		<div>
-			<a href="/communities/{data.community.id}/invite">Invite Members</a>
-			<a href="/communities/{data.community.id}/items/add">Add Existing Items</a>
-			<a href="/communities/{data.community.id}/items/new">Create New Item</a>
+			<a href={resolve('/(authed)/communities/[id]/invite', { id: String(data.community.id) })}
+				>Invite Members</a
+			>
+			<a href={resolve('/(authed)/communities/[id]/items/add', { id: String(data.community.id) })}
+				>Add Existing Items</a
+			>
+			<a href={resolve('/(authed)/communities/[id]/items/new', { id: String(data.community.id) })}
+				>Create New Item</a
+			>
 		</div>
 	{/if}
 
@@ -28,26 +37,11 @@
 	{#if data.items.length === 0}
 		<p>No items in this community yet.</p>
 	{:else}
-		<ul>
+		<Collection>
 			{#each data.items as item (item.id)}
-				<a href={resolve('/(authed)/items/[id]', { id: String(item.id) })}>
-					<li>
-						<strong>{item.name}</strong>
-						{#if item.description}
-							- {item.description}
-						{/if}
-						<br />
-						<small>Owned by {item.ownerName}</small>
-						{#if data.isOwner}
-							<form method="post" action="?/removeItem" use:enhance style="display: inline;">
-								<input type="hidden" name="itemId" value={item.id} />
-								<Button type="submit" variant="outline">Remove</Button>
-							</form>
-						{/if}
-					</li>
-				</a>
+				<ItemListItem {...item} currentUserId={data.user.id} />
 			{/each}
-		</ul>
+		</Collection>
 	{/if}
 
 	{#if form?.removed}
@@ -69,4 +63,4 @@
 			</li>
 		{/each}
 	</ul>
-</div>
+</PageContent>

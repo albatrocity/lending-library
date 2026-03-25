@@ -12,7 +12,7 @@
 <PageContent>
 	<PageHeader title="My Items">
 		{#snippet actions()}
-			<ButtonLink variant="outline" href={resolve('/(authed)/items/new')}>New Item</ButtonLink>
+			<ButtonLink variant="subtle" href={resolve('/(authed)/items/new')}>New Item</ButtonLink>
 		{/snippet}
 	</PageHeader>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { sva } from 'styled-system/css';
 	import type { Snippet } from 'svelte';
+	import Container from './Container.svelte';
 
 	type Props = {
 		sidebar?: Snippet;
@@ -27,8 +28,7 @@
 				overflowY: 'auto'
 			},
 			main: {
-				flex: 1,
-				padding: '2'
+				flex: 1
 			}
 		}
 	});
@@ -45,7 +45,9 @@
 		{/if}
 
 		<main class={classes.main}>
-			{@render children()}
+			<Container size="2xl">
+				{@render children()}
+			</Container>
 		</main>
 	</div>
 </div>

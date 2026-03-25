@@ -140,7 +140,9 @@ export const getCommunityItems = async (communityId: number) => {
 			name: items.name,
 			description: items.description,
 			ownerId: items.ownerId,
-			ownerName: user.name
+			ownerName: user.name,
+			createdAt: items.createdAt,
+			updatedAt: items.updatedAt
 		})
 		.from(communityItems)
 		.innerJoin(items, eq(communityItems.itemId, items.id))

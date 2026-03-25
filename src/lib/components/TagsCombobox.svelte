@@ -43,6 +43,7 @@
 		emptyMessage?: string;
 		oninputvaluechange?: (details: InputValueChangeDetails) => void;
 		onvaluechange?: (details: ValueChangeDetails<T>) => void;
+		size?: 'xs' | 'sm' | 'md' | 'lg';
 	};
 
 	const uid = $props.id();
@@ -64,7 +65,8 @@
 		row,
 		emptyMessage,
 		oninputvaluechange,
-		onvaluechange
+		onvaluechange,
+		size = 'md'
 	}: Props = $props();
 
 	let inputValue = $state('');
@@ -157,7 +159,11 @@
 		combobox().clearValue(value);
 	}
 
-	const comboRecipe = comboboxRecipe();
+	const comboRecipe = $derived(
+		comboboxRecipe({
+			size
+		})
+	);
 </script>
 
 <ComboboxRootProvider
@@ -175,7 +181,7 @@
 	>
 		<div class={comboRecipe.tagList}>
 			{#each selectedItems as item (itemToValue(item))}
-				<Tag label={itemToString(item)} onRemove={() => removeTag(itemToValue(item))} />
+				<Tag size="sm" label={itemToString(item)} onRemove={() => removeTag(itemToValue(item))} />
 			{/each}
 			<ComboboxControl class={css({ flex: 1 })}>
 				<ComboboxInput {placeholder} class={cx(comboRecipe.input, css({ flex: 1 }))} />
