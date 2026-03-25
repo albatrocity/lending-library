@@ -100,7 +100,7 @@
 	{:else}
 		<Collection>
 			{#each data.items as item (item.id)}
-				<ItemListItem {...item} currentUserId={data.user.id} />
+				<ItemListItem {...item} />
 			{/each}
 		</Collection>
 
