@@ -3,6 +3,13 @@ import { borrows } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { recordItemActivity } from './activityService';
 
+export const getActiveBorrowForItem = async (itemId: number) => {
+	return await db.query.borrows.findFirst({
+		where: (t, { eq, and }) => and(eq(t.itemId, itemId), eq(t.status, 'active')),
+		columns: { borrowerId: true, id: true }
+	});
+};
+
 export const getBorrowByRequestId = async (borrowRequestId: number) => {
 	return await db.query.borrows.findFirst({
 		where: (t, { eq }) => eq(t.borrowRequestId, borrowRequestId)

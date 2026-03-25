@@ -12,6 +12,7 @@ import { getItemActivity } from '$lib/server/services/activityService';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { getUserItemBorrowRequest } from '$lib/server/services/borrowRequestsService';
+import { getActiveBorrowForItem } from '$lib/server/services/borrowsService';
 
 export const load: PageServerLoad = async ({ params, parent }) => {
 	const { user } = await parent();
@@ -27,19 +28,15 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 	}
 
 	const isOwner = item.ownerId === user.id;
-	const itemCommunities = await getItemCommunities(itemId);
 
-	const availableCommunities = isOwner
-		? await getCommunitiesForItemAssignment(user.id, itemId)
-		: [];
-
-	const pendingBorrowRequest = await getUserItemBorrowRequest({
-		userId: user.id,
-		itemId: itemId,
-		status: 'pending'
-	});
-
-	const activity = await getItemActivity(itemId, user.id);
+	const [itemCommunities, availableCommunities, pendingBorrowRequest, activeBorrow, activity] =
+		await Promise.all([
+			getItemCommunities(itemId),
+			isOwner ? getCommunitiesForItemAssignment(user.id, itemId) : Promise.resolve([]),
+			getUserItemBorrowRequest({ userId: user.id, itemId, status: 'pending' }),
+			getActiveBorrowForItem(itemId),
+			getItemActivity(itemId, user.id)
+		]);
 
 	return {
 		item,
@@ -48,6 +45,7 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 		itemCommunities,
 		availableCommunities,
 		pendingBorrowRequest,
+		activeBorrowerId: activeBorrow?.borrowerId ?? null,
 		activity
 	};
 };

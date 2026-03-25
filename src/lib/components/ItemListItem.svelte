@@ -6,16 +6,26 @@
 	import Button from '$lib/components/Button.svelte';
 	import ButtonLink from '$lib/components/ButtonLink.svelte';
 	import TagComponent from './Tag.svelte';
-
 	import Card from './Card.svelte';
+	import BorrowStatusBadge from './BorrowStatusBadge.svelte';
 	import { getUserContext } from '$lib/contexts/user.svelte';
+	import { hstack } from 'styled-system/patterns';
 
 	type ItemListItemProps = Item & {
 		tags?: Tag[];
 		ownerName?: string;
+		activeBorrowerId?: string | null;
 	};
 
-	let { id, name, description, ownerId, tags = [], ownerName }: ItemListItemProps = $props();
+	let {
+		id,
+		name,
+		description,
+		ownerId,
+		tags = [],
+		ownerName,
+		activeBorrowerId = null
+	}: ItemListItemProps = $props();
 
 	const getUser = getUserContext();
 	const currentUserId = $derived(getUser().id);
@@ -23,7 +33,10 @@
 
 <Card>
 	{#snippet header()}
-		<a href={resolve('/(authed)/items/[id]', { id: String(id) })}>{name} - {id}</a>
+		<div class={hstack({ gap: '2', alignItems: 'center', justifyContent: 'space-between' })}>
+			<a href={resolve('/(authed)/items/[id]', { id: String(id) })}>{name}</a>
+			<BorrowStatusBadge {activeBorrowerId} />
+		</div>
 	{/snippet}
 
 	{#snippet subheader()}
@@ -59,7 +72,7 @@
 			</form>
 		{/if}
 
-		{#if currentUserId !== ownerId}
+		{#if currentUserId !== ownerId && !activeBorrowerId}
 			<ButtonLink size="xs" href={resolve('/(authed)/items/[id]/borrow', { id: String(id) })}
 				>Borrow</ButtonLink
 			>

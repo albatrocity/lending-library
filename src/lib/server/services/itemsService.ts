@@ -166,7 +166,11 @@ export const getItemsForUserCommunities = async (params: CommunityItemsParams) =
 			where: whereClause,
 			with: {
 				tagsToItems: { with: { tag: true } },
-				lender: true
+				lender: true,
+				borrows: {
+					where: (t, { eq }) => eq(t.status, 'active'),
+					columns: { borrowerId: true }
+				}
 			},
 			orderBy: [asc(items.name)],
 			limit,
@@ -175,11 +179,12 @@ export const getItemsForUserCommunities = async (params: CommunityItemsParams) =
 	]);
 
 	return {
-		items: itemResults.map(({ tagsToItems, lender, ...rest }) => ({
+		items: itemResults.map(({ tagsToItems, lender, borrows, ...rest }) => ({
 			...rest,
 			tags: tagsToItems.map((t) => t.tag),
 			ownerName: lender.name,
-			ownerEmail: lender.email
+			ownerEmail: lender.email,
+			activeBorrowerId: borrows[0]?.borrowerId ?? null
 		})),
 		total: countResult[0]?.total ?? 0,
 		page,

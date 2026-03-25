@@ -34,8 +34,9 @@ export default defineConfig({
 	},
 	outdir: 'styled-system',
 	staticCss: {
-		css: [{ properties: { colorPalette: ['primary', 'danger'] } }],
+		css: [{ properties: { colorPalette: ['primary', 'secondary', 'danger'] } }],
 		recipes: {
+			badge: ['*'],
 			button: ['*'],
 			input: ['*'],
 			textarea: ['*']

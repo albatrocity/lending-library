@@ -4,7 +4,8 @@ import {
 	communityMemberships,
 	communityItems,
 	items,
-	user
+	user,
+	borrows
 } from '$lib/server/db/schema';
 import type { CreateCommunity } from '$lib/schemas/communities';
 
@@ -157,8 +158,17 @@ export const getOwnerItemsNotInCommunity = async (ownerId: string, communityId: 
 		.where(eq(communityItems.communityId, communityId));
 
 	return await db
-		.select()
+		.select({
+			id: items.id,
+			name: items.name,
+			description: items.description,
+			ownerId: items.ownerId,
+			createdAt: items.createdAt,
+			updatedAt: items.updatedAt,
+			activeBorrowerId: borrows.borrowerId
+		})
 		.from(items)
+		.leftJoin(borrows, and(eq(borrows.itemId, items.id), eq(borrows.status, 'active')))
 		.where(and(eq(items.ownerId, ownerId), notInArray(items.id, itemsInCommunity)));
 };
 

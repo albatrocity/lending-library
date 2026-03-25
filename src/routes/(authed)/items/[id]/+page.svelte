@@ -4,8 +4,9 @@
 	import { resolve } from '$app/paths';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import PageContent from '$lib/components/PageContent.svelte';
-	import { stack } from 'styled-system/patterns';
+	import { stack, hstack } from 'styled-system/patterns';
 	import Tag from '$lib/components/Tag.svelte';
+	import BorrowStatusBadge from '$lib/components/BorrowStatusBadge.svelte';
 
 	let { data, form } = $props();
 	const item = $derived(data.item);
@@ -14,7 +15,10 @@
 <PageContent>
 	<PageHeader title={item.name}>
 		{#snippet subheader()}
-			<p>{data.item.ownerId}</p>
+			<div class={hstack({ gap: '2', alignItems: 'center' })}>
+				<p>{data.item.ownerId}</p>
+				<BorrowStatusBadge activeBorrowerId={data.activeBorrowerId} />
+			</div>
 		{/snippet}
 	</PageHeader>
 
@@ -89,7 +93,7 @@
 					You requested to borrow this item on {data.pendingBorrowRequest.createdAt.toLocaleDateString()}
 					starting {data.pendingBorrowRequest.startDate.toLocaleDateString()}
 				</p>
-			{:else}
+			{:else if !data.activeBorrowerId}
 				<a href={resolve('/(authed)/items/[id]/borrow', { id: String(item.id) })}
 					>Borrow this item</a
 				>

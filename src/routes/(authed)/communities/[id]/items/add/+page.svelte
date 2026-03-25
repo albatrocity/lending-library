@@ -5,6 +5,8 @@
 	import ButtonLink from '$lib/components/ButtonLink.svelte';
 	import PageContent from '$lib/components/PageContent.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
+	import Badge from '$lib/components/Badge.svelte';
+	import { hstack } from 'styled-system/patterns';
 
 	let { data, form } = $props();
 </script>
@@ -26,10 +28,15 @@
 					<li>
 						<label>
 							<input type="checkbox" name="itemIds" value={item.id} />
-							{item.name}
-							{#if item.description}
-								- {item.description}
-							{/if}
+							<span class={hstack({ gap: '2', alignItems: 'center', display: 'inline-flex' })}>
+								{item.name}
+								{#if item.description}
+									<span>- {item.description}</span>
+								{/if}
+								{#if item.activeBorrowerId}
+									<Badge status="unavailable" label="Lent out" />
+								{/if}
+							</span>
 						</label>
 					</li>
 				{/each}

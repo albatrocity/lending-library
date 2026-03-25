@@ -84,7 +84,7 @@ export const tagsInput = defineSlotRecipe({
 			}
 		},
 		itemPreview: {
-			colorPalette: 'primary',
+			colorPalette: 'secondary',
 			padding: '0.25rem',
 			alignItems: 'center',
 			borderRadius: 'sm',

@@ -4,31 +4,31 @@ overview: Add visual borrow-status indicators across three item views by extendi
 todos:
   - id: extend-items-query
     content: Extend getItemsForUserCommunities and getItem to include active borrow borrowerId via Drizzle with clause
-    status: pending
+    status: completed
   - id: add-borrow-service-fn
     content: Add getActiveBorrowForItem function to borrowsService.ts
-    status: pending
+    status: completed
   - id: extend-community-query
     content: Extend getOwnerItemsNotInCommunity with left join on borrows to include activeBorrowerId
-    status: pending
+    status: completed
   - id: update-server-loads
     content: Update server load functions for items/[id] and communities/[id]/items/add to return borrow status data
-    status: pending
+    status: completed
   - id: create-badge-recipe
     content: Create badge recipe in src/lib/theme/recipes/badge.ts with borrowed/unavailable variants; register in index and panda config
-    status: pending
+    status: completed
   - id: create-badge-component
     content: Create Badge.svelte component using the badge recipe
-    status: pending
+    status: completed
   - id: update-item-list-item
     content: Update ItemListItem.svelte to accept activeBorrowerId and render Badge; hide Borrow button when unavailable
-    status: pending
+    status: completed
   - id: update-item-detail
     content: Update items/[id]/+page.svelte to show borrow status Badge
-    status: pending
+    status: completed
   - id: update-community-add
     content: Update communities/[id]/items/add/+page.svelte to show lent-out Badge next to items
-    status: pending
+    status: completed
 isProject: false
 ---
 
@@ -62,7 +62,7 @@ with: {
 In the `.map()`, derive an `activeBorrowerId` field:
 
 ```ts
-activeBorrowerId: rest.borrows?.[0]?.borrowerId ?? null
+activeBorrowerId: rest.borrows?.[0]?.borrowerId ?? null;
 ```
 
 This avoids N+1 queries; at most one borrow will be active per item.
@@ -75,20 +75,20 @@ Same approach: add `borrows` to the `with` clause so the detail page gets the ac
 
 ```ts
 export const getActiveBorrowForItem = async (itemId: number) => {
-  return await db.query.borrows.findFirst({
-    where: (t, { eq, and }) => and(eq(t.itemId, itemId), eq(t.status, 'active')),
-    columns: { borrowerId: true, id: true }
-  });
+	return await db.query.borrows.findFirst({
+		where: (t, { eq, and }) => and(eq(t.itemId, itemId), eq(t.status, 'active')),
+		columns: { borrowerId: true, id: true }
+	});
 };
 ```
 
 This serves as a targeted lookup for the individual item detail page, which loads a single item via `getItem`.
 
-### 4. Update individual item page server load ([src/routes/(authed)/items/[id]/+page.server.ts](src/routes/(authed)/items/[id]/+page.server.ts))
+### 4. Update individual item page server load ([src/routes/(authed)/items/[id]/+page.server.ts](<src/routes/(authed)/items/[id]/+page.server.ts>))
 
 After fetching the item, also fetch the active borrow and return `activeBorrow` in the page data. This enables the detail page to show who is borrowing the item.
 
-### 5. Community items add page ([src/routes/(authed)/communities/[id]/items/add/+page.server.ts](src/routes/(authed)/communities/[id]/items/add/+page.server.ts))
+### 5. Community items add page ([src/routes/(authed)/communities/[id]/items/add/+page.server.ts](<src/routes/(authed)/communities/[id]/items/add/+page.server.ts>))
 
 `getOwnerItemsNotInCommunity` in [communitiesService.ts](src/lib/server/services/communitiesService.ts) uses a raw `select()`. Extend it with a left join on `borrows` (filtered to `status = 'active'`) to include a `borrowerId` column per item, or switch to a Drizzle relational query. The simpler option is a left join adding `borrows.borrowerId` aliased as `activeBorrowerId`.
 
@@ -116,11 +116,11 @@ A small component that accepts `variant` and `children`/`label` props, applying 
   - Else if `activeBorrowerId` is truthy: badge with variant `unavailable`, label "Unavailable".
 - Conditionally hide the "Borrow" action button when the item has an active borrow.
 
-### 9. Update item detail page ([src/routes/(authed)/items/[id]/+page.svelte](src/routes/(authed)/items/[id]/+page.svelte))
+### 9. Update item detail page ([src/routes/(authed)/items/[id]/+page.svelte](<src/routes/(authed)/items/[id]/+page.svelte>))
 
 Add a `Badge` in the header area (next to the item title or in the subheader). Use `getUserContext()` from `$lib/contexts/user.svelte` to compare the active borrower against the current user, applying the same borrowed/unavailable logic as `ItemListItem`.
 
-### 10. Update community items add page ([src/routes/(authed)/communities/[id]/items/add/+page.svelte](src/routes/(authed)/communities/[id]/items/add/+page.svelte))
+### 10. Update community items add page ([src/routes/(authed)/communities/[id]/items/add/+page.svelte](<src/routes/(authed)/communities/[id]/items/add/+page.svelte>))
 
 Next to each item name in the checkbox list, show a "Lent out" badge if `activeBorrowerId` is present. Since this page only shows the current user's own items, the borrower is always someone else — no user context comparison needed here.
 
@@ -166,6 +166,3 @@ flowchart TD
     GetActive -->|activeBorrow| IDP
     GetOwner -->|activeBorrowerId| CAP
 ```
-
-
-
