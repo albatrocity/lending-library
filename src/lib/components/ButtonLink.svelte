@@ -1,22 +1,21 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import type { HTMLAnchorAttributes } from 'svelte/elements';
 	import { css, cx } from 'styled-system/css';
 	import { button } from 'styled-system/recipes';
 	import type { SystemProperties } from 'styled-system/types';
 
-	type ButtonProps = {
+	type ButtonLinkProps = {
 		children: Snippet;
 		colorPalette?: SystemProperties['colorPalette'];
 	} & Parameters<typeof button>[0] &
-		HTMLButtonAttributes;
+		HTMLAnchorAttributes;
 
-	let { children, colorPalette, ...rest }: ButtonProps = $props();
+	let { children, colorPalette, ...rest }: ButtonLinkProps = $props();
 
 	const [variantProps, htmlProps] = $derived(button.splitVariantProps(rest));
 </script>
 
-<button
-	class={cx(button(variantProps), colorPalette ? css({ colorPalette }) : undefined)}
-	{...htmlProps}>{@render children()}</button
+<a class={cx(button(variantProps), colorPalette ? css({ colorPalette }) : undefined)} {...htmlProps}
+	>{@render children()}</a
 >

@@ -1,6 +1,7 @@
 import { defineConfig } from '@pandacss/dev';
 import { animationStyles } from './src/lib/theme/animation-styles';
 import { colors } from './src/lib/theme/colors';
+import { globalCss } from './src/lib/theme/global-css';
 import { keyframes } from './src/lib/theme/keyframes';
 import { layerStyles } from './src/lib/theme/layer-styles';
 import { textStyles } from './src/lib/theme/text-styles';
@@ -10,6 +11,7 @@ import * as recipes from './src/lib/theme/recipes';
 
 export default defineConfig({
 	preflight: true,
+	globalCss,
 	include: ['./src/**/*.{js,ts,svelte}'],
 	exclude: [],
 	theme: {
@@ -32,7 +34,9 @@ export default defineConfig({
 	},
 	outdir: 'styled-system',
 	staticCss: {
+		css: [{ properties: { colorPalette: ['primary', 'danger'] } }],
 		recipes: {
+			button: ['*'],
 			input: ['*'],
 			textarea: ['*']
 		},

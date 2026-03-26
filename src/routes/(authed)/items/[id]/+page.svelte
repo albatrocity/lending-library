@@ -2,93 +2,117 @@
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
 	import { resolve } from '$app/paths';
+	import PageHeader from '$lib/components/PageHeader.svelte';
+	import PageContent from '$lib/components/PageContent.svelte';
+	import { stack } from 'styled-system/patterns';
+	import Tag from '$lib/components/Tag.svelte';
 
 	let { data, form } = $props();
 	const item = $derived(data.item);
 </script>
 
-<h1>{item.name}</h1>
-{@html item.description}
+<PageContent>
+	<PageHeader title={item.name}>
+		{#snippet subheader()}
+			<p>{data.item.ownerId}</p>
+		{/snippet}
+	</PageHeader>
 
-<ul>
-	{#each item.tags as tag (tag.id)}
-		<li>{tag.name}</li>
-	{/each}
-</ul>
+	<section class={stack({ gap: '2' })}>
+		{@html item.description}
 
-<h2>Communities</h2>
-{#if data.isOwner}
-	{#if data.itemCommunities.length === 0}
-		<p>This item is not in any communities yet.</p>
-	{:else}
 		<ul>
-			{#each data.itemCommunities as community (community.id)}
-				<li>
-					{community.name}
-					<form method="post" action="?/removeFromCommunity" use:enhance style="display: inline;">
-						<input type="hidden" name="communityId" value={community.id} />
-						<Button type="submit" variant="outline">Remove</Button>
-					</form>
-				</li>
+			{#each item.tags as tag (tag.id)}
+				<Tag label={tag.name} />
 			{/each}
 		</ul>
-	{/if}
-{:else}
-	<p>
-		This item is available in {data.itemCommunities.length}
-		{data.itemCommunities.length === 1 ? 'community' : 'communities'}
-	</p>
-{/if}
+	</section>
 
-{#if data.isOwner}
-	<h3>Add to Community</h3>
-	{#if data.availableCommunities.length === 0}
-		<p>No more communities available to add this item to.</p>
-	{:else}
-		<form method="post" action="?/assignToCommunity" use:enhance>
-			<select name="communityId" required>
-				<option value="">Select a community</option>
-				{#each data.availableCommunities as community (community.id)}
-					<option value={community.id}>{community.name}</option>
+	<section class={stack({ gap: '2' })}>
+		<h2>Communities</h2>
+		{#if data.isOwner}
+			{#if data.itemCommunities.length === 0}
+				<p>This item is not in any communities yet.</p>
+			{:else}
+				<ul>
+					{#each data.itemCommunities as community (community.id)}
+						<li>
+							{community.name}
+							<form
+								method="post"
+								action="?/removeFromCommunity"
+								use:enhance
+								style="display: inline;"
+							>
+								<input type="hidden" name="communityId" value={community.id} />
+								<Button type="submit" variant="outline">Remove</Button>
+							</form>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		{:else}
+			<p>
+				This item is available in {data.itemCommunities.length}
+				{data.itemCommunities.length === 1 ? 'community' : 'communities'}
+			</p>
+		{/if}
+
+		{#if data.isOwner}
+			<h3>Add to Community</h3>
+			{#if data.availableCommunities.length === 0}
+				<p>No more communities available to add this item to.</p>
+			{:else}
+				<form method="post" action="?/assignToCommunity" use:enhance>
+					<select name="communityId" required>
+						<option value="">Select a community</option>
+						{#each data.availableCommunities as community (community.id)}
+							<option value={community.id}>{community.name}</option>
+						{/each}
+					</select>
+					<Button type="submit">Add to Community</Button>
+				</form>
+			{/if}
+
+			{#if form?.error}
+				<p>{form.error}</p>
+			{/if}
+
+			{#if form?.success}
+				<p>Item added to community successfully!</p>
+			{/if}
+		{/if}
+
+		{#if !data.isOwner}
+			{#if data.pendingBorrowRequest}
+				<p>
+					You requested to borrow this item on {data.pendingBorrowRequest.createdAt.toLocaleDateString()}
+					starting {data.pendingBorrowRequest.startDate.toLocaleDateString()}
+				</p>
+			{:else}
+				<a href={resolve('/(authed)/items/[id]/borrow', { id: String(item.id) })}
+					>Borrow this item</a
+				>
+			{/if}
+		{/if}
+	</section>
+
+	<section class={stack({ gap: '2' })}>
+		<h2>Activity</h2>
+		{#if data.activity.length === 0}
+			<p>No activity yet.</p>
+		{:else}
+			<ul>
+				{#each data.activity as event (event.id)}
+					<li>
+						<strong>{event.actorName}</strong>
+						&mdash; {event.message ?? event.activityType}
+						<time datetime={event.occurredAt?.toISOString()}>
+							{event.occurredAt?.toLocaleDateString()}
+						</time>
+					</li>
 				{/each}
-			</select>
-			<Button type="submit">Add to Community</Button>
-		</form>
-	{/if}
-
-	{#if form?.error}
-		<p>{form.error}</p>
-	{/if}
-
-	{#if form?.success}
-		<p>Item added to community successfully!</p>
-	{/if}
-{/if}
-
-{#if !data.isOwner}
-	{#if data.pendingBorrowRequest}
-		<p>
-			You requested to borrow this item on {data.pendingBorrowRequest.createdAt.toLocaleDateString()}
-			starting {data.pendingBorrowRequest.startDate.toLocaleDateString()}
-		</p>
-	{:else}
-		<a href={resolve('/(authed)/items/[id]/borrow', { id: String(item.id) })}>Borrow this item</a>
-	{/if}
-{/if}
-
-<h2>Activity</h2>
-{#if data.activity.length === 0}
-	<p>No activity yet.</p>
-{:else}
-	<ul>
-		{#each data.activity as event (event.id)}
-			<li>
-				<strong>{event.actorName}</strong>
-				&mdash; {event.message ?? event.activityType}
-				<time datetime={event.occurredAt?.toISOString()}>
-					{event.occurredAt?.toLocaleDateString()}
-				</time>
-			</li>
-		{/each}
-	</ul>
-{/if}
+			</ul>
+		{/if}
+	</section>
+</PageContent>

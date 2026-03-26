@@ -11,12 +11,14 @@
 		topTags,
 		initialTags = [],
 		creatable = true,
-		onchange
+		onchange,
+		size = 'md'
 	}: {
 		topTags: Tag[];
 		initialTags?: { name: string }[];
 		creatable?: boolean;
 		onchange?: () => void;
+		size?: 'xs' | 'sm' | 'md' | 'lg';
 	} = $props();
 
 	const asyncList = useAsyncList<Tag>(() => ({
@@ -72,4 +74,5 @@
 	{creatable}
 	oninputvaluechange={handleInputValueChange}
 	onvaluechange={handleValueChange}
+	{size}
 />

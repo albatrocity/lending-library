@@ -48,5 +48,13 @@ export const textStyles = defineTextStyles({
 			fontWeight: 'medium',
 			lineHeight: 'tight'
 		}
+	},
+	body: {
+		description: 'Used for body text',
+		value: {
+			fontSize: 'md',
+			fontWeight: 'normal',
+			lineHeight: 'relaxed'
+		}
 	}
 });
