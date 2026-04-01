@@ -13,6 +13,7 @@ import {
 	createItemWithCommunitiesSchema,
 	updateItemSchema
 } from '$lib/schemas/items';
+import { getImagesForItem } from './imagesService';
 
 import type { z } from 'zod';
 import { and, eq, inArray, ilike, notExists, count as drizzleCount, asc } from 'drizzle-orm';
@@ -81,8 +82,10 @@ export const getItem = async (id: number) => {
 		with: { tagsToItems: { with: { tag: true } } }
 	});
 	if (!result) return undefined;
+
+	const images = await getImagesForItem(id);
 	const { tagsToItems, ...rest } = result;
-	return { ...rest, tags: tagsToItems.map((t) => t.tag) };
+	return { ...rest, tags: tagsToItems.map((t) => t.tag), images };
 };
 
 export const updateItem = async (id: number, payload: z.infer<typeof updateItemSchema>) => {
