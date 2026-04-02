@@ -28,6 +28,21 @@
 		</ul>
 	</section>
 
+	{#if item.images && item.images.length > 0}
+		<section class={stack({ gap: '2' })}>
+			<h2>Images</h2>
+			<div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+				{#each item.images as image (image.id)}
+					<img
+						src={image.url}
+						alt={item.name}
+						style="max-width: 200px; max-height: 200px; object-fit: cover; border-radius: 8px;"
+					/>
+				{/each}
+			</div>
+		</section>
+	{/if}
+
 	<section class={stack({ gap: '2' })}>
 		<h2>Communities</h2>
 		{#if data.isOwner}

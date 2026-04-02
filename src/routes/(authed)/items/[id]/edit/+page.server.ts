@@ -1,5 +1,6 @@
 import { getItem, getItemCommunities, updateItem } from '$lib/server/services/itemsService';
 import { searchTags, setItemTags } from '$lib/server/services/tagsService';
+import { uploadItemImages, deleteItemImages } from '$lib/server/services/imagesService';
 import { getUserCommunities } from '$lib/server/services/communitiesService';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../[id]/edit/$types';
@@ -64,6 +65,22 @@ export const actions: Actions = {
 
 		await setItemTags(item.id, tagNames);
 
-		return redirect(302, `/items`);
+		// Handle image deletions
+		const imagesToRemoveJson = rawFormData.get('imagesToRemove') as string;
+		const imagesToRemove: number[] = imagesToRemoveJson ? JSON.parse(imagesToRemoveJson) : [];
+
+		if (imagesToRemove.length > 0) {
+			await deleteItemImages(imagesToRemove);
+		}
+
+		// Handle new image uploads
+		const imageFiles = rawFormData.getAll('images') as File[];
+		const filesToUpload = imageFiles.filter((f) => f.size > 0);
+
+		if (filesToUpload.length > 0) {
+			await uploadItemImages(item.id, filesToUpload);
+		}
+
+		return redirect(302, `/items/${item.id}`);
 	}
 };

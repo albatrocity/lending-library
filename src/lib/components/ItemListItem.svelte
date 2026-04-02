@@ -13,9 +13,18 @@
 	type ItemListItemProps = Item & {
 		tags?: Tag[];
 		ownerName?: string;
+		thumbnailUrl?: string | null;
 	};
 
-	let { id, name, description, ownerId, tags = [], ownerName }: ItemListItemProps = $props();
+	let {
+		id,
+		name,
+		description,
+		ownerId,
+		tags = [],
+		ownerName,
+		thumbnailUrl
+	}: ItemListItemProps = $props();
 
 	const getUser = getUserContext();
 	const currentUserId = $derived(getUser().id);
@@ -23,7 +32,7 @@
 
 <Card>
 	{#snippet header()}
-		<a href={resolve('/(authed)/items/[id]', { id: String(id) })}>{name} - {id}</a>
+		<a href={resolve('/(authed)/items/[id]', { id: String(id) })}>{name}</a>
 	{/snippet}
 
 	{#snippet subheader()}
@@ -31,6 +40,16 @@
 			<small>by {ownerName}</small>
 		{/if}
 	{/snippet}
+
+	{#if thumbnailUrl}
+		<a href={resolve('/(authed)/items/[id]', { id: String(id) })}>
+			<img
+				src={thumbnailUrl}
+				alt={name}
+				style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 0.5rem;"
+			/>
+		</a>
+	{/if}
 
 	{@html description}
 
