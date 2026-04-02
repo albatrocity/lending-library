@@ -4,6 +4,7 @@ import {
 	communities,
 	communityMemberships,
 	items,
+	images,
 	tags,
 	tagsToItems,
 	borrows
@@ -17,6 +18,23 @@ import { getImagesForItem } from './imagesService';
 
 import type { z } from 'zod';
 import { and, eq, inArray, ilike, notExists, count as drizzleCount, asc } from 'drizzle-orm';
+
+async function getThumbnailsForItems(itemIds: number[]): Promise<Map<number, string>> {
+	if (itemIds.length === 0) return new Map();
+
+	const allImages = await db
+		.select()
+		.from(images)
+		.where(and(eq(images.imageableType, 'items'), inArray(images.imageableId, itemIds)));
+
+	const thumbnailMap = new Map<number, string>();
+	for (const img of allImages) {
+		if (!thumbnailMap.has(img.imageableId)) {
+			thumbnailMap.set(img.imageableId, img.url);
+		}
+	}
+	return thumbnailMap;
+}
 
 export const getAllItems = async () => {
 	const results = await db.query.items.findMany({
@@ -33,9 +51,14 @@ export const getAllItemsByOwnerId = async (ownerId: string) => {
 		with: { tagsToItems: { with: { tag: true } } },
 		where: (t, { eq }) => eq(t.ownerId, ownerId)
 	});
+
+	const itemIds = results.map((item) => item.id);
+	const thumbnails = await getThumbnailsForItems(itemIds);
+
 	return results.map(({ tagsToItems, ...rest }) => ({
 		...rest,
-		tags: tagsToItems.map((t) => t.tag)
+		tags: tagsToItems.map((t) => t.tag),
+		thumbnailUrl: thumbnails.get(rest.id) ?? null
 	}));
 };
 
@@ -177,12 +200,16 @@ export const getItemsForUserCommunities = async (params: CommunityItemsParams) =
 		})
 	]);
 
+	const itemIds = itemResults.map((item) => item.id);
+	const thumbnails = await getThumbnailsForItems(itemIds);
+
 	return {
 		items: itemResults.map(({ tagsToItems, lender, ...rest }) => ({
 			...rest,
 			tags: tagsToItems.map((t) => t.tag),
 			ownerName: lender.name,
-			ownerEmail: lender.email
+			ownerEmail: lender.email,
+			thumbnailUrl: thumbnails.get(rest.id) ?? null
 		})),
 		total: countResult[0]?.total ?? 0,
 		page,
