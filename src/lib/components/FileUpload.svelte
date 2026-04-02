@@ -8,10 +8,12 @@
 	};
 
 	let {
+		name = 'images',
 		images = [],
 		onFilesChange,
 		onImageRemove
 	}: {
+		name?: string;
 		images?: ImageData[];
 		onFilesChange?: (files: File[]) => void;
 		onImageRemove?: (imageId: number) => void;
@@ -20,6 +22,7 @@
 	const recipe = fileUpload();
 
 	const fileUploadState = useFileUpload(() => ({
+		name,
 		accept: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
 		maxFileSize: 10 * 1024 * 1024,
 		maxFiles: 10,

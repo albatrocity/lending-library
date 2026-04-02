@@ -14,6 +14,7 @@
 	type Tag = { id: number; name: string };
 	type Community = { id: number; name: string };
 	type ImageData = { id: number; url: string };
+	type Prefilled = { name: string; description: string; tags: string[] };
 
 	let {
 		action,
@@ -21,7 +22,9 @@
 		item,
 		topTags,
 		itemCommunities,
-		allCommunities
+		allCommunities,
+		prefilled,
+		pendingImage
 	}: {
 		action: string;
 		form?: { errors?: string | string[] } | null;
@@ -29,12 +32,17 @@
 		topTags: Tag[];
 		itemCommunities: Community[];
 		allCommunities: Community[];
+		prefilled?: Prefilled | null;
+		pendingImage?: File | null;
 	} = $props();
 
-	let pendingFiles = $state<File[]>([]);
 	let imagesToRemove = $state<number[]>([]);
 	const currentImages = $derived(
 		(item?.images ?? []).filter((img) => !imagesToRemove.includes(img.id))
+	);
+
+	const prefilledTags = $derived(
+		prefilled?.tags?.map((name, index) => ({ id: -index - 1, name })) ?? []
 	);
 
 	const communityList = useListCollection(() => ({
@@ -44,35 +52,8 @@
 		filter: (itemString, filterText) => itemString.toLowerCase().includes(filterText.toLowerCase())
 	}));
 
-	function handleFilesChange(files: File[]) {
-		pendingFiles = files;
-	}
-
 	function handleImageRemove(imageId: number) {
 		imagesToRemove = [...imagesToRemove, imageId];
-	}
-
-	async function uploadPendingFiles(itemId: number) {
-		for (const file of pendingFiles) {
-			const formData = new FormData();
-			formData.append('file', file);
-			formData.append('itemId', String(itemId));
-
-			await fetch('/api/images', {
-				method: 'POST',
-				body: formData
-			});
-		}
-		pendingFiles = [];
-	}
-
-	async function deleteRemovedImages() {
-		for (const imageId of imagesToRemove) {
-			await fetch(`/api/images?id=${imageId}`, {
-				method: 'DELETE'
-			});
-		}
-		imagesToRemove = [];
 	}
 </script>
 
@@ -80,28 +61,24 @@
 	<form
 		method="post"
 		{action}
-		use:enhance={() => {
-			return async ({ result, update }) => {
-				if (result.type === 'redirect' || result.type === 'success') {
-					if (item?.id) {
-						await deleteRemovedImages();
-						await uploadPendingFiles(item.id);
-					}
-				}
-				await update();
-			};
+		enctype="multipart/form-data"
+		use:enhance={({ formData }) => {
+			// Add pending image from AI flow if present
+			if (pendingImage) {
+				formData.append('pendingImage', pendingImage);
+			}
 		}}
 	>
 		<div class={stack({ gap: 4 })}>
 			<Field label="Name">
-				<TextInput name="name" placeholder="Name" value={item?.name} />
+				<TextInput name="name" placeholder="Name" value={item?.name ?? prefilled?.name} />
 			</Field>
 			<Field label="Description">
 				<TextArea
 					autoresize
 					name="description"
 					placeholder="Description"
-					value={item?.description}
+					value={item?.description ?? prefilled?.description}
 				/>
 			</Field>
 			<Field label="Communities">
@@ -120,17 +97,17 @@
 				/>
 			</Field>
 			<Field label="Tags">
-				<TagsInput {topTags} initialTags={item?.tags} />
+				<TagsInput {topTags} initialTags={item?.tags ?? prefilledTags} />
 			</Field>
-			{#if item?.id}
-				<Field label="Images">
-					<FileUpload
-						images={currentImages}
-						onFilesChange={handleFilesChange}
-						onImageRemove={handleImageRemove}
-					/>
-				</Field>
-			{/if}
+			<Field label="Images">
+				<FileUpload
+					images={currentImages}
+					onImageRemove={handleImageRemove}
+				/>
+			</Field>
+
+			<input type="hidden" name="imagesToRemove" value={JSON.stringify(imagesToRemove)} />
+
 			<Button type="submit">{item ? 'Save' : 'Create'}</Button>
 		</div>
 	</form>

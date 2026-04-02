@@ -1,5 +1,6 @@
 import { createItemInCommunities } from '$lib/server/services/itemsService';
 import { searchTags, setItemTags } from '$lib/server/services/tagsService';
+import { uploadItemImages } from '$lib/server/services/imagesService';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { createItemWithCommunitiesSchema } from '$lib/schemas/items';
@@ -40,6 +41,19 @@ export const actions: Actions = {
 		const item = await createItemInCommunities(data);
 		await setItemTags(item.id, tagNames);
 
-		redirect(302, '/users/me/items');
+		// Handle image uploads
+		const imageFiles = rawFormData.getAll('images') as File[];
+		const pendingImage = rawFormData.get('pendingImage') as File | null;
+
+		const filesToUpload = [
+			...(pendingImage && pendingImage.size > 0 ? [pendingImage] : []),
+			...imageFiles.filter((f) => f.size > 0)
+		];
+
+		if (filesToUpload.length > 0) {
+			await uploadItemImages(item.id, filesToUpload);
+		}
+
+		redirect(302, `/items/${item.id}`);
 	}
 };

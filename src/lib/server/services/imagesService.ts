@@ -2,6 +2,7 @@ import { db } from '$lib/server/db';
 import { images } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
+import { generateKey, uploadFile, deleteFile } from './storageService';
 
 type CreateImageParams = {
 	url: string;
@@ -12,6 +13,41 @@ type CreateImageParams = {
 export async function createImage(params: CreateImageParams) {
 	const [image] = await db.insert(images).values(params).returning();
 	return image;
+}
+
+export async function uploadItemImages(itemId: number, files: File[]) {
+	const uploadedImages = [];
+
+	for (const file of files) {
+		if (file.size === 0) continue;
+
+		const buffer = Buffer.from(await file.arrayBuffer());
+		const key = generateKey(itemId, file.name);
+		const url = await uploadFile(key, buffer, file.type);
+
+		const image = await createImage({
+			url,
+			imageableType: 'items',
+			imageableId: itemId
+		});
+
+		uploadedImages.push(image);
+	}
+
+	return uploadedImages;
+}
+
+export async function deleteItemImages(imageIds: number[]) {
+	for (const imageId of imageIds) {
+		const image = await getImage(imageId);
+		if (image) {
+			const key = extractKeyFromUrl(image.url);
+			if (key) {
+				await deleteFile(key);
+			}
+			await deleteImage(imageId);
+		}
+	}
 }
 
 export async function getImagesForItem(itemId: number) {
