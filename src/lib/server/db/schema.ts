@@ -75,10 +75,10 @@ export const communityItems = pgTable(
 	{
 		communityId: integer('community_id')
 			.notNull()
-			.references(() => communities.id),
+			.references(() => communities.id, { onDelete: 'cascade' }),
 		itemId: integer('item_id')
 			.notNull()
-			.references(() => items.id)
+			.references(() => items.id, { onDelete: 'cascade' })
 	},
 	(t) => [primaryKey({ columns: [t.communityId, t.itemId] })]
 );
@@ -134,7 +134,7 @@ export const borrowRequests = pgTable(
 			.references(() => user.id),
 		itemId: integer('item_id')
 			.notNull()
-			.references(() => items.id),
+			.references(() => items.id, { onDelete: 'cascade' }),
 		startDate: timestamp('start_date').notNull(),
 		endDate: timestamp('end_date'),
 		description: text('description'),
@@ -152,7 +152,9 @@ export const borrows = pgTable(
 	'borrows',
 	{
 		id: serial('id').primaryKey(),
-		borrowRequestId: integer('borrow_request_id').references(() => borrowRequests.id),
+		borrowRequestId: integer('borrow_request_id').references(() => borrowRequests.id, {
+			onDelete: 'cascade'
+		}),
 		borrowerId: text('borrower_id')
 			.notNull()
 			.references(() => user.id),
@@ -161,7 +163,7 @@ export const borrows = pgTable(
 			.references(() => user.id),
 		itemId: integer('item_id')
 			.notNull()
-			.references(() => items.id),
+			.references(() => items.id, { onDelete: 'cascade' }),
 		startDate: timestamp('start_date').notNull(),
 		endDate: timestamp('end_date'),
 		returnDate: timestamp('return_date'),
@@ -207,10 +209,10 @@ export const tagsToItems = pgTable(
 	{
 		tagId: integer('tag_id')
 			.notNull()
-			.references(() => tags.id),
+			.references(() => tags.id, { onDelete: 'cascade' }),
 		itemId: integer('item_id')
 			.notNull()
-			.references(() => items.id)
+			.references(() => items.id, { onDelete: 'cascade' })
 	},
 	(t) => [primaryKey({ columns: [t.tagId, t.itemId] })]
 );
