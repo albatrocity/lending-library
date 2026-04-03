@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
+	import ButtonLink from '$lib/components/ButtonLink.svelte';
 	import { resolve } from '$app/paths';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import PageContent from '$lib/components/PageContent.svelte';
@@ -15,6 +16,13 @@
 	<PageHeader title={item.name}>
 		{#snippet subheader()}
 			<p>{data.item.ownerId}</p>
+		{/snippet}
+		{#snippet actions()}
+			{#if data.isOwner}
+				<ButtonLink href={resolve('/(authed)/items/[id]/edit', { id: String(item.id) })}>
+					Edit
+				</ButtonLink>
+			{/if}
 		{/snippet}
 	</PageHeader>
 

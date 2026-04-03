@@ -59,7 +59,11 @@ export const fileUpload = defineSlotRecipe({
 			borderRadius: 'l2',
 			borderWidth: '1px',
 			borderColor: 'border',
-			bg: 'bg.default'
+			bg: 'bg.default',
+			'&[data-pending]': {
+				borderStyle: 'dashed',
+				borderColor: 'border.muted'
+			}
 		},
 		itemPreview: {
 			display: 'flex',
